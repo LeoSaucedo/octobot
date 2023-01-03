@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Create Transaction</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
+        integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <h1>Create Transaction</h1>
+    <form action="" {{url_for('transaction')}} method="post" enctype="application/json">
+        <label for="group">Group Name:</label>
+        <input type="text" name="group" id="group" required>
+        <br>
+        <label for="payer">Payer:</label>
+        <input type="text" name="payer" id="payer" required>
+        <br>
+        <label for="subtotal">Subtotal $:</label>
+        <input type="number" name="subtotal" step="0.01" id="subtotal"required>
+        <br>
+        <label for="tax">Tax $:</label>
+        <input type="number" name="tax" id="tax" step="0.01", value="0" required>
+        <br>
+        <label for="tip">Tip $:</label>
+        <input type="number" name="tip" id="tip" step="0.01" , value="0" required>
+        <br>
+        <label for="memo">Memo: </label>
+        <input type="text" name="memo" id="memo" required>
+        <br>
+        Participants:
+        <div id="participants" name="participants[]"></div>
+        <button id="add_item" type="button">Add Participant</button>
+        <input type="submit" value="Submit">
+    </form>
+    <script>
+        $(document).ready(function () {
+            var count_item = -1;
+            $("#add_item").on("click", function () {
+                count_item += 1;
+                $("<input/>").attr({
+                    type: "text", placeholder: "Name",
+                    name: "names", "required": "true"
+                }).appendTo("#participants").wrap($("<div/>"));
+                $("<input/>").attr({
+                    type: "number", placeholder: "Amount Owed (Opt)",
+                    name: "amounts", step: "0.01",
+                }).appendTo("#participants").wrap($("<div/>"));
+                $("<br/>").appendTo("#participants");
+            });
+        })
+    </script>
+</body>
+
+<a href="/">Main Menu</a>
+
+</html>

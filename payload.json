@@ -1,0 +1,19 @@
+{
+    "group": "Nola",
+    "payer": "Bryan",
+    "subtotal": "100",
+    "tax": "7",
+    "tip": "20",
+    "memo": "food",
+    "debtors": [
+      {
+        "name": "Carlos",
+        "amount": ""
+      },
+      {
+        "name": "Jerm",
+        "amount": "33"
+      }
+    ],
+    "ip": "127.0.0.1"
+  }
