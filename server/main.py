@@ -4,9 +4,11 @@ import sqlite3
 
 app = Flask(__name__)
 
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     return render_template("index.html")
+
 
 @app.route("/transaction", methods=["GET", "POST"])
 def transaction():
@@ -31,19 +33,20 @@ def transaction():
         transactionId = service.add_transaction(payload)
         # Connect to the database and retrieve all values for the given transactionId.
         conn = sqlite3.connect('database.db')
-        cursor = conn.execute("SELECT * FROM Transactions WHERE transaction_id = ?", (transactionId,))
+        cursor = conn.execute(
+            "SELECT * FROM Transactions WHERE transaction_id = ?", (transactionId,))
         rows = cursor.fetchall()
         conn.close()
         print(payload)
         return render_template("confirmation.html", payload=payload, calculations=str(rows), transactionId=transactionId)
     return render_template("transaction.html")
 
+
 @app.route("/report", methods=["GET", "POST"])
 def report():
     if request.method == "POST":
         return render_template("report-page.html", report=service.generate_report(request.form["group"].lower().strip(), request.form.__contains__("reset")))
     return render_template("report.html")
-
 
 
 if __name__ == "__main__":
