@@ -4,6 +4,15 @@ import service
 api = Blueprint('api', __name__)
 
 
+@api.route('/api/health', methods=['GET'])
+def health():
+    '''
+    This endpoint is used to check the health of the server.
+    :return: OK
+    '''
+    return 'OK'
+
+
 @api.route('/api/report/<group_name>', methods=['GET'])
 def report(group_name):
     '''
@@ -19,6 +28,7 @@ def report(group_name):
     if len(report) == 0:
         return 'Group does not exist, or does not have any transactions', 404
     return report
+
 
 @api.route('/api/transaction', methods=['POST'])
 def transaction():
