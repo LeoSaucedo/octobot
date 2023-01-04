@@ -1,9 +1,15 @@
 from flask import Flask, request, render_template
 import service
 import sqlite3
+import api
+import os
 
 app = Flask(__name__)
 
+<<<<<<< HEAD
+=======
+app.register_blueprint(api.api)
+>>>>>>> 498001242923836eb35c39cf2455c86b3f05b76a
 
 @app.route("/", methods=["GET", "POST"])
 def index():
