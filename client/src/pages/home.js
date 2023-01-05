@@ -4,7 +4,7 @@ import Emoji from 'a11y-react-emoji'
 
 const Home = () => {
   return (
-    <div>
+    <div className="App">
       <h1><Emoji symbol="🐙" label="Octopus" />Welcome To Octobot<Emoji symbol="🤖" label="Robot" /></h1>
         <Link to="/transaction">
                 <button>Add a transaction</button>

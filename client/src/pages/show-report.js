@@ -17,7 +17,7 @@ function ShowReport() {
     )
   })
   return (
-    <div>
+    <div className='App'>
         <h1>Report</h1>
         {(typeof data.report === 'undefined') ? (
             <p>Loading...</p>

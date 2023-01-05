@@ -17,13 +17,15 @@ const Report = () => {
         navigate('/show-report', {state:group})
     }
     return (
-            <div>
+            <div className="App">
                 <h1>Generate Report</h1>
                 <form onSubmit={handleSubmit}>
-                    <label>
-                        Group: 
-                        <input type="text" value={group} onChange={handleOnChange} />
-                    </label>
+                    <input 
+                        type="text" 
+                        placeholder="Group" 
+                        value={group} 
+                        onChange={handleOnChange} 
+                    />
                     <br/><br/>
                     <input type="submit" value="Submit" />
                 </form>
