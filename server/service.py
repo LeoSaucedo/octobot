@@ -2,6 +2,7 @@ import sqlite3
 import uuid
 
 
+
 def add_transaction(payload):
     # Insert payload values into the database
     # Calculate the amount by adding tax and tip to the subtotal
@@ -112,4 +113,4 @@ def generate_report(groupName, resetTab):
         conn.execute("UPDATE Transactions SET is_paid = 1 WHERE group_name = ?", (groupName,))
         conn.commit()
     conn.close()
-    return output
+    return {'report': output}
