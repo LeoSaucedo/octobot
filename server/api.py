@@ -1,5 +1,6 @@
 from flask import Blueprint, request, render_template
 import service
+from flask_cors import cross_origin
 
 api = Blueprint('api', __name__)
 
@@ -14,6 +15,7 @@ def health():
 
 
 @api.route('/api/report/<group_name>', methods=['GET'])
+@cross_origin()
 def report(group_name):
     '''
     This endpoint is used to get the report for a group.
