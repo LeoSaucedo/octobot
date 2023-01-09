@@ -3,7 +3,7 @@ export class Report {
 }
 
 /**
- *
+ * Gets a report from the API.
  * @param groupName The group name to generate the report for.
  * @param reset Whether to reset the tab.
  * @returns The report data in the format: {"report":["Jerm owes bryan $41.91","Carlos owes bryan $42.55"]}

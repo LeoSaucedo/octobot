@@ -13,6 +13,7 @@ import {
   IonCardTitle,
   IonButton,
   IonCheckbox,
+  IonList,
 } from "@ionic/react";
 import "./Tab2.css";
 import React, { useState } from "react";
@@ -23,6 +24,7 @@ import getReport from "../api/ReportApi";
 const Tab2: React.FC = () => {
   const [hasClicked, setHasClicked] = useState(false);
   const [showHide, setShowHide] = useState(false);
+  const [groupName, setGroupName] = useState("");
 
   const [report, setReport] = useState(new Report());
 
@@ -38,18 +40,16 @@ const Tab2: React.FC = () => {
     reset: false,
   };
 
-  const { handleSubmit, control, reset, watch } = useForm({
+  const { handleSubmit, control, reset, watch, getValues } = useForm({
     defaultValues: { ...initialValues },
     mode: "onChange",
   });
   const onSubmit = async (data: any) => {
-    console.log("URL: " + process.env.REACT_APP_API_ENDPOINT);
-    console.log(data);
     handleToggle();
     await getReport(data.group, data.reset).then((response) => {
-      console.log("This is a test:", response);
       setReport(response);
     });
+    setGroupName(data.group);
     reset(initialValues);
   };
   return (
@@ -106,9 +106,13 @@ const Tab2: React.FC = () => {
         {showHide ? (
           <IonCard>
             <IonCardHeader>
-              <IonCardTitle>Card Title</IonCardTitle>
+              <IonCardTitle>{groupName}</IonCardTitle>
             </IonCardHeader>
-            <IonCardContent>{report.report}</IonCardContent>
+            <IonCardContent>
+              {report.report.map((item) => (
+                <li>{item}</li>
+              ))}
+            </IonCardContent>
           </IonCard>
         ) : (
           <span></span>
