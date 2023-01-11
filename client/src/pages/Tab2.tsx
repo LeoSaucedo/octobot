@@ -67,7 +67,7 @@ const Tab2: React.FC = () => {
         </IonHeader>
         <form className="ion-padding" onSubmit={handleSubmit(onSubmit)}>
           <IonItem>
-            <IonLabel position="floating">Group</IonLabel>
+            <IonLabel>Group</IonLabel>
             <Controller
               control={control}
               name="group"
@@ -109,8 +109,10 @@ const Tab2: React.FC = () => {
               <IonCardTitle>{groupName}</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
-              {report.report.map((item) => (
-                <li>{item}</li>
+              {report.report.map((item, i) => (
+                <div key={i}>
+                  <li>{item}</li>
+                </div>
               ))}
             </IonCardContent>
           </IonCard>

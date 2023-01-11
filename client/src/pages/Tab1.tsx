@@ -13,113 +13,87 @@ import {
   IonButtons,
   IonAvatar,
   IonIcon,
+  IonText,
+  IonNote,
+  useIonAlert,
+  IonCard,
+  IonCardHeader,
+  IonCardContent,
+  IonCardTitle,
+  IonCardSubtitle,
 } from "@ionic/react";
 import ExploreContainer from "../components/ExploreContainer";
 import logo from "../logo.png";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import "./Tab1.css";
-import { alertCircleOutline } from "ionicons/icons";
+import { alertCircleOutline, closeCircleOutline } from "ionicons/icons";
+import React, { useState } from "react";
+import postTransaction, { Transaction } from "../api/TransactionApi";
+import { ResponseObj } from "../api/TransactionApi";
+import { report } from "process";
+
+type FormValues = {
+  group: string;
+  payer: string;
+  subtotal: string;
+  tax: string;
+  tip: string;
+  memo: string;
+  participants: {
+    name: string;
+    amount: string;
+  }[];
+};
 
 const Tab1: React.FC = () => {
-  // let initialValues = {
-  //   group: "",
-  //   payer: "",
-  //   subtotal: "",
-  //   tax: "",
-  //   tip: "",
-  //   memo: "",
-  //   Participants: [],
-  //   reset: false,
-  // };
+  const [hasClicked, setHasClicked] = useState(false);
+  const [showHide, setShowHide] = useState(false);
+  const handleToggle = () => {
+    if (!hasClicked) {
+      setShowHide(!showHide);
+      setHasClicked(true);
+    }
+  };
+
+  const [presentAlert] = useIonAlert();
+
+  const [responses, setResponses] = useState<ResponseObj[]>([]);
+
+  let initialValues = {
+    group: "",
+    payer: "",
+    subtotal: "",
+    tax: "",
+    tip: "",
+    memo: "",
+    participants: [
+      {
+        name: "",
+        amount: "",
+      },
+    ],
+  };
 
   const {
+    register,
+    reset,
+    formState: { errors },
     handleSubmit,
     control,
-    reset,
-    watch,
-    getValues,
-    register,
-    formState: { errors },
   } = useForm({
-    // defaultValues: { ...initialValues },
-    mode: "onChange",
+    defaultValues: { ...initialValues },
   });
 
-  const fields = [
-    {
-      label: "Group",
-      rules: {
-        required: true,
-        maxLength: 32,
-      },
-      props: {
-        name: "group",
-        type: "text",
-        inputMode: "text",
-      },
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "participants",
+    rules: {
+      required: `You must have at least one participant.`,
+      // validate: () => {
+      //   return true;
+      // },
     },
-    {
-      label: "Payer",
-      rules: {
-        required: true,
-        maxLength: 32,
-      },
-      props: {
-        name: "payer",
-        type: "text",
-        inputMode: "text",
-      },
-    },
-    {
-      label: "Subtotal",
-      rules: {
-        required: true,
-      },
-      props: {
-        name: "subtotal",
-        type: "number",
-        inputMode: "numeric",
-      },
-    },
-    {
-      label: "Tax",
-      rules: {
-        required: false,
-      },
-      props: {
-        name: "tax",
-        type: "number",
-        inputMode: "numeric",
-      },
-    },
-    {
-      label: "Tip",
-      rules: {
-        required: false,
-      },
-      props: {
-        name: "tip",
-        type: "number",
-        inputMode: "numeric",
-      },
-    },
-    {
-      label: "Memo",
-      rules: {
-        required: true,
-        maxLength: 140,
-      },
-      props: {
-        name: "memo",
-        type: "text",
-        inputMode: "text",
-      },
-    },
-  ];
-
-  const onSubmit = async (data: any) => {
-    console.log(getValues());
-  };
+  });
 
   return (
     <IonPage>
@@ -134,37 +108,173 @@ const Tab1: React.FC = () => {
             <IonTitle size="large">Add Transaction</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="ion-padding"
+          onSubmit={handleSubmit((data) => {
+            console.log(data);
+            var transaction: Transaction = {
+              group: data.group,
+              payer: data.payer,
+              subtotal: parseFloat(data.subtotal),
+              tax: parseFloat(data.tax),
+              tip: parseFloat(data.tip),
+              memo: data.memo,
+              participants: data.participants.map((participant) => {
+                return {
+                  name: participant.name,
+                  amount: parseFloat(participant.amount),
+                };
+              }),
+            };
+            postTransaction(transaction)
+              .then((response) => {
+                setResponses(response);
+                console.log(response);
+                handleToggle();
+              })
+              .catch((error) => {
+                presentAlert({
+                  header: "Error",
+                  message: error,
+                  buttons: ["OK"],
+                });
+              });
+            reset(initialValues);
+          })}
+        >
+          <IonItem>
+            <IonLabel>Group</IonLabel>
+            <IonInput
+              required={true}
+              {...register(`group`, { required: true })}
+            ></IonInput>
+          </IonItem>
+          <IonItem>
+            <IonLabel>Payer</IonLabel>
+            <IonInput
+              required={true}
+              {...register(`payer`, { required: true })}
+            ></IonInput>
+          </IonItem>
+          <IonItem>
+            <IonLabel>Subtotal $</IonLabel>
+            <IonInput
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              required={true}
+              {...register(`subtotal`, {
+                required: true,
+                valueAsNumber: true,
+              })}
+            ></IonInput>
+          </IonItem>
+          <IonItem>
+            <IonLabel>Tax $</IonLabel>
+            <IonInput
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              {...register(`tax`, { valueAsNumber: true })}
+            ></IonInput>
+          </IonItem>
+          <IonItem>
+            <IonLabel>Tip $</IonLabel>
+            <IonInput
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              {...register(`tip`, { valueAsNumber: true })}
+            ></IonInput>
+          </IonItem>
+          <IonItem>
+            <IonLabel>Memo</IonLabel>
+            <IonInput
+              required={true}
+              {...register(`memo`, { required: true })}
+            ></IonInput>
+          </IonItem>
+          <IonItem lines="none">
+            <IonLabel>
+              <b>Participants</b>
+            </IonLabel>
+          </IonItem>
           {fields.map((field, index) => {
-            const { label, rules, props } = field;
-
             return (
-              <IonItem key={`form_field_${index}`} lines="full">
-                <>
-                  <IonLabel position="floating">{label}</IonLabel>
-                  <Controller
-                    control={control}
-                    name={props.name}
-                    rules={rules}
-                    render={({
-                      fieldState: { invalid, error },
-                      field: { value, onChange },
-                    }) => (
-                      <IonInput
-                        type={props.type as any}
-                        value={value}
-                        onIonChange={({ detail: { value } }) => onChange(value)}
-                      />
-                    )}
+              <section key={index}>
+                <IonItem>
+                  <IonInput
+                    placeholder="Name"
+                    required={true}
+                    {...register(`participants.${index}.name`, {
+                      required: true,
+                    })}
                   />
-                </>
-              </IonItem>
+                  <IonLabel>$</IonLabel>
+                  <IonInput
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    {...register(`participants.${index}.amount`, {
+                      valueAsNumber: true,
+                    })}
+                  ></IonInput>
+                  <IonButton
+                    type="button"
+                    color="danger"
+                    fill="clear"
+                    onClick={() => remove(index)}
+                  >
+                    <IonIcon
+                      slot="icon-only"
+                      icon={closeCircleOutline}
+                    ></IonIcon>
+                  </IonButton>
+                </IonItem>
+              </section>
             );
           })}
+          <IonItem lines="none">
+            <IonButton
+              fill="outline"
+              color="success"
+              type="button"
+              onClick={() => {
+                append({
+                  name: "",
+                  amount: "",
+                });
+              }}
+            >
+              Add Participant
+            </IonButton>
+          </IonItem>
+          <IonText color="danger">{errors.participants?.root?.message}</IonText>
           <IonButton className="ion-margin-top" type="submit" expand="block">
+            {" "}
             Submit
           </IonButton>
         </form>
+        {showHide ? (
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Transaction Summary</IonCardTitle>
+              <IonCardSubtitle>{responses[0].memo}</IonCardSubtitle>
+            </IonCardHeader>
+            <IonCardContent>
+              {responses.map((response, i) => (
+                <div key={i}>
+                  <li>
+                    {response.debtor} owes {response.purchaser} $
+                    {response.amount.toFixed(2)}.
+                  </li>
+                </div>
+              ))}
+            </IonCardContent>
+          </IonCard>
+        ) : (
+          <span></span>
+        )}
       </IonContent>
     </IonPage>
   );

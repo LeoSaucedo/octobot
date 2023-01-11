@@ -1,12 +1,17 @@
 import {
   IonContent,
   IonHeader,
+  IonInput,
   IonPage,
   IonTitle,
   IonToolbar,
+  IonLabel,
+  IonItem,
+  IonButton,
 } from "@ionic/react";
 import ExploreContainer from "../components/ExploreContainer";
 import "./Tab3.css";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 
 const Tab3: React.FC = () => {
   return (
@@ -22,7 +27,6 @@ const Tab3: React.FC = () => {
             <IonTitle size="large">Tab 3</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer name="Tab 3 page" />
       </IonContent>
     </IonPage>
   );

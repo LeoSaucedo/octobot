@@ -13,13 +13,26 @@ export class Participant {
   amount: number = 0;
 }
 
+export class ResponseObj {
+  amount: number = 0;
+  debtor: string = "";
+  group_name: string = "";
+  id: string = "";
+  is_paid: number = 0;
+  memo: string = "";
+  purchaser: string = "";
+  transaction_id: string = "";
+}
+
 /**
  * Posts a transaction to the API.
  * @param transaction The transaction to post.
- * @returns The UUID of the transaction.
+ * @returns The response object.
  */
-async function postTransaction(transaction: Transaction): Promise<string> {
-  var response = "";
+async function postTransaction(
+  transaction: Transaction
+): Promise<ResponseObj[]> {
+  var response = [new ResponseObj()];
   const url = process.env.REACT_APP_API_ENDPOINT + "/transaction";
   console.log("url: " + url);
   await fetch(url, {
@@ -29,13 +42,14 @@ async function postTransaction(transaction: Transaction): Promise<string> {
     },
     body: JSON.stringify(transaction),
   })
-    .then((response) => response.json())
-    .then((response) => {
-      console.log("Success:", response);
-      response = response;
+    .then((res) => res.json())
+    .then((res) => {
+      console.log("Success:", res);
+      response = res;
     })
     .catch((error) => {
       console.error("Error:", error);
+      throw error;
     });
   return response;
 }

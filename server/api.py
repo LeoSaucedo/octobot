@@ -53,13 +53,16 @@ def transaction():
         "name": "Jerm",
         "amount": "33"
         }
-        ],
-    "ip": "127.0.0.1"
+        ]
     }
 
     :return: TransactionId of the transaction that was added
     '''
     data = request.get_json()
+    print(data)
     if data is None:
         return 'Bad Request', 400
-    return service.add_transaction(data)
+    transactionId = service.add_transaction(data)
+    rows = service.get_db_rows(transactionId)
+    print(rows)
+    return rows
