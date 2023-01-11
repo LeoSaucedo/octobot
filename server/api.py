@@ -53,8 +53,7 @@ def transaction():
         "name": "Jerm",
         "amount": "33"
         }
-        ]
-    }
+        ],
 
     :return: TransactionId of the transaction that was added
     '''

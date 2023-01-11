@@ -45,7 +45,7 @@ def add_transaction(payload):
         if rat["name"] == payload["payer"]:
             continue
         insert_transaction(transactionId, payload["group"], payload["payer"],
-                           rat["name"], amount, payload["memo"])
+                           rat["name"], amount, payload["memo"], payload["ip"])
 
     if len(splitters) > 0:
         splitterAmount = ((float(payload["subtotal"]) + float(payload["tax"]) + float(
@@ -54,14 +54,14 @@ def add_transaction(payload):
         if splitter["name"] == payload["payer"]:
             continue
         insert_transaction(transactionId, payload["group"], payload["payer"],
-                           splitter["name"], splitterAmount, payload["memo"])
+                           splitter["name"], splitterAmount, payload["memo"], payload["ip"])
     return transactionId
 
 
-def insert_transaction(transactionId, groupName, purchaser, debtor, amount, memo):
+def insert_transaction(transactionId, groupName, purchaser, debtor, amount, memo, ip):
     conn = sqlite3.connect('database.db')
-    conn.execute("INSERT INTO Transactions(id,transaction_id,group_name,purchaser,debtor,amount,is_paid,memo) VALUES (?,?,?,?,?,?,?,?)",
-                 (str(uuid.uuid4()), transactionId, groupName, purchaser, debtor, amount, 0, memo))
+    conn.execute("INSERT INTO Transactions(id,transaction_id,group_name,purchaser,debtor,amount,is_paid,memo,ip_addr) VALUES (?,?,?,?,?,?,?,?,?)",
+                 (str(uuid.uuid4()), transactionId, groupName, purchaser, debtor, amount, 0, memo, ip))
     conn.commit()
     conn.close()
 

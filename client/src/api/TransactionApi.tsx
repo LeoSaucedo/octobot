@@ -6,6 +6,7 @@ export class Transaction {
   tip: number = 0;
   memo: string = "";
   participants: Participant[] = [];
+  ip: string = "";
 }
 
 export class Participant {
@@ -32,6 +33,7 @@ export class ResponseObj {
 async function postTransaction(
   transaction: Transaction
 ): Promise<ResponseObj[]> {
+  console.log(transaction);
   var response = [new ResponseObj()];
   const url = process.env.REACT_APP_API_ENDPOINT + "/transaction";
   console.log("url: " + url);

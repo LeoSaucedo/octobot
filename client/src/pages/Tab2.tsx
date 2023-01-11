@@ -14,12 +14,14 @@ import {
   IonButton,
   IonCheckbox,
   IonList,
+  useIonAlert,
 } from "@ionic/react";
 import "./Tab2.css";
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Report } from "../api/ReportApi";
 import getReport from "../api/ReportApi";
+import { Preferences } from "@capacitor/preferences";
 
 const Tab2: React.FC = () => {
   const [hasClicked, setHasClicked] = useState(false);
@@ -27,6 +29,8 @@ const Tab2: React.FC = () => {
   const [groupName, setGroupName] = useState("");
 
   const [report, setReport] = useState(new Report());
+
+  const [presentAlert] = useIonAlert();
 
   const handleToggle = () => {
     if (!hasClicked) {
@@ -40,17 +44,60 @@ const Tab2: React.FC = () => {
     reset: false,
   };
 
+  async function isAuthenticated() {
+    await Preferences.set({
+      key: "userId",
+      value: "123",
+    });
+    const { value } = await Preferences.get({ key: "userId" });
+    console.log(value);
+    return value !== null;
+  }
+
   const { handleSubmit, control, reset, watch, getValues } = useForm({
     defaultValues: { ...initialValues },
     mode: "onChange",
   });
   const onSubmit = async (data: any) => {
-    handleToggle();
-    await getReport(data.group, data.reset).then((response) => {
-      setReport(response);
-    });
+    if (await isAuthenticated()) {
+      await getReport(data.group, data.reset)
+        .then((response) => {
+          handleToggle();
+          setReport(response);
+        })
+        .catch((error) => {
+          console.log("failed");
+          presentAlert({
+            header: "Error",
+            message: error,
+            buttons: ["OK"],
+          });
+        });
+      reset(initialValues);
+    } else {
+      if (data.reset) {
+        presentAlert({
+          header: "Error",
+          message: "You must login to reset values.",
+          buttons: ["OK"],
+        });
+      } else {
+        await getReport(data.group, false)
+          .then((response) => {
+            handleToggle();
+            setReport(response);
+          })
+          .catch((error) => {
+            console.log("failed");
+            presentAlert({
+              header: "Error",
+              message: error,
+              buttons: ["OK"],
+            });
+          });
+      }
+    }
     setGroupName(data.group);
-    reset(initialValues);
   };
   return (
     <IonPage>

@@ -27,6 +27,7 @@ async function getReport(groupName: string, reset: boolean): Promise<Report> {
     })
     .catch((error) => {
       console.error("Error:", error);
+      throw error;
     });
   return report;
 }

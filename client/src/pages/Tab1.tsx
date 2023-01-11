@@ -31,6 +31,7 @@ import React, { useState } from "react";
 import postTransaction, { Transaction } from "../api/TransactionApi";
 import { ResponseObj } from "../api/TransactionApi";
 import { report } from "process";
+import { Preferences } from "@capacitor/preferences";
 
 type FormValues = {
   group: string;
@@ -57,8 +58,9 @@ const Tab1: React.FC = () => {
 
   const [presentAlert] = useIonAlert();
 
-  const [responses, setResponses] = useState<ResponseObj[]>([]);
+  const [ip, setIp] = useState<string>("");
 
+  const [responses, setResponses] = useState<ResponseObj[]>([]);
   let initialValues = {
     group: "",
     payer: "",
@@ -95,6 +97,16 @@ const Tab1: React.FC = () => {
     },
   });
 
+  async function isAuthenticated() {
+    //TODO: npx cap sync
+    await Preferences.set({
+      key: "userId",
+      value: "123",
+    });
+    const { value } = await Preferences.get({ key: "userId" });
+    return value != null;
+  }
+
   return (
     <IonPage>
       <IonHeader>
@@ -110,36 +122,52 @@ const Tab1: React.FC = () => {
         </IonHeader>
         <form
           className="ion-padding"
-          onSubmit={handleSubmit((data) => {
+          onSubmit={handleSubmit(async (data) => {
             console.log(data);
+            if (ip == "") {
+              await fetch("https://ipapi.co/json/")
+                .then((response) => response.json())
+                .then((data) => setIp(data.ip));
+            }
             var transaction: Transaction = {
-              group: data.group,
-              payer: data.payer,
+              group: data.group.toLowerCase(),
+              payer: data.payer.toLowerCase(),
               subtotal: parseFloat(data.subtotal),
               tax: parseFloat(data.tax),
               tip: parseFloat(data.tip),
               memo: data.memo,
+              ip: ip,
               participants: data.participants.map((participant) => {
                 return {
-                  name: participant.name,
+                  name: participant.name.toLowerCase(),
                   amount: parseFloat(participant.amount),
                 };
               }),
             };
-            postTransaction(transaction)
-              .then((response) => {
-                setResponses(response);
-                console.log(response);
-                handleToggle();
-              })
-              .catch((error) => {
-                presentAlert({
-                  header: "Error",
-                  message: error,
-                  buttons: ["OK"],
+            if (await isAuthenticated()) {
+              postTransaction(transaction)
+                .then((response) => {
+                  setResponses(response);
+                  console.log(response);
+                  handleToggle();
+                })
+                .then(() => {
+                  reset(initialValues);
+                })
+                .catch((error) => {
+                  presentAlert({
+                    header: "Error",
+                    message: error,
+                    buttons: ["OK"],
+                  });
                 });
+            } else {
+              presentAlert({
+                header: "Error",
+                message: "You must be logged in to submit a transaction.",
+                buttons: ["OK"],
               });
-            reset(initialValues);
+            }
           })}
         >
           <IonItem>
