@@ -9,6 +9,8 @@ def add_transaction(payload):
         payload["tax"] = 0
     if payload["tip"] is None:
         payload["tip"] = 0
+    if payload["ip"] is None:
+        payload["ip"] = ""
     transactionId = str(uuid.uuid4())
     payerInParticipants = False
     for participant in payload["participants"]:
