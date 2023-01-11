@@ -143,4 +143,4 @@ def generate_report(groupName, resetTab):
             "UPDATE Transactions SET is_paid = 1 WHERE group_name = ?", (groupName,))
         conn.commit()
     conn.close()
-    return {'report': output}
+    return output
