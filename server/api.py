@@ -29,7 +29,7 @@ def report(group_name):
     report = service.generate_report(group_name, reset == 'true')
     if len(report) == 0:
         return 'Group does not exist, or does not have any transactions', 404
-    return report
+    return {"report": report}
 
 
 @api.route('/api/transaction', methods=['POST'])
