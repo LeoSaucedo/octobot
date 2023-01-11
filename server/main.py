@@ -2,10 +2,13 @@ from flask import Flask, request, render_template
 import service
 import sqlite3
 import api
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+cors = CORS(app)
 app.register_blueprint(api.api)
+
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 @app.route("/", methods=["GET", "POST"])

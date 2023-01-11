@@ -6,6 +6,6 @@ CREATE TABLE Transactions (
   debtor string not null,
   amount real not null,
   is_paid boolean not null,
-  ip_addr text not null,
-  memo text not null
+  memo text not null,
+  ip_addr text not null
 );

@@ -1,5 +1,6 @@
 from flask import Blueprint, request, render_template
 import service
+from flask_cors import cross_origin
 
 api = Blueprint('api', __name__)
 
@@ -14,6 +15,7 @@ def health():
 
 
 @api.route('/api/report/<group_name>', methods=['GET'])
+@cross_origin()
 def report(group_name):
     '''
     This endpoint is used to get the report for a group.
@@ -52,12 +54,14 @@ def transaction():
         "amount": "33"
         }
         ],
-    "ip": "127.0.0.1"
-    }
 
     :return: TransactionId of the transaction that was added
     '''
     data = request.get_json()
+    print(data)
     if data is None:
         return 'Bad Request', 400
-    return service.add_transaction(data)
+    transactionId = service.add_transaction(data)
+    rows = service.get_db_rows(transactionId)
+    print(rows)
+    return rows

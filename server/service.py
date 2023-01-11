@@ -5,9 +5,15 @@ import uuid
 def add_transaction(payload):
     # Insert payload values into the database
     # Calculate the amount by adding tax and tip to the subtotal
+    if payload["tax"] is None:
+        payload["tax"] = 0
+    if payload["tip"] is None:
+        payload["tip"] = 0
     transactionId = str(uuid.uuid4())
     payerInParticipants = False
     for participant in payload["participants"]:
+        if participant["amount"] is None:
+            participant["amount"] = ""
         if (participant["name"] == payload["payer"]):
             payerInParticipants = True
             break
@@ -33,31 +39,53 @@ def add_transaction(payload):
     totalRatAmount = 0
 
     for rat in rats:
-        amount = float(rat["amount"])+(float(rat["amount"])*tax_percent)+(float(rat["amount"])*tip_percent)
+        amount = float(rat["amount"])+(float(rat["amount"])
+                                       * tax_percent)+(float(rat["amount"])*tip_percent)
         totalRatAmount += amount
         if rat["name"] == payload["payer"]:
             continue
-        insert_transaction(transactionId, payload["group"], payload["payer"], rat["name"], amount, payload["ip"],payload["memo"])
+        insert_transaction(transactionId, payload["group"], payload["payer"],
+                           rat["name"], amount, payload["memo"], payload["ip"])
 
     if len(splitters) > 0:
-        splitterAmount = ((float(payload["subtotal"]) + float(payload["tax"]) + float(payload["tip"])) - totalRatAmount ) / len(splitters)
+        splitterAmount = ((float(payload["subtotal"]) + float(payload["tax"]) + float(
+            payload["tip"])) - totalRatAmount) / len(splitters)
     for splitter in splitters:
         if splitter["name"] == payload["payer"]:
             continue
-        insert_transaction(transactionId, payload["group"], payload["payer"], splitter["name"], splitterAmount, payload["ip"],payload["memo"])
+        insert_transaction(transactionId, payload["group"], payload["payer"],
+                           splitter["name"], splitterAmount, payload["memo"], payload["ip"])
     return transactionId
-    
 
-def insert_transaction(transactionId, groupName, purchaser, debtor, amount,ipAddress, memo):
+
+def insert_transaction(transactionId, groupName, purchaser, debtor, amount, memo, ip):
     conn = sqlite3.connect('database.db')
-    conn.execute("INSERT INTO Transactions(id,transaction_id,group_name,purchaser,debtor,amount,is_paid,ip_addr,memo) VALUES (?,?,?,?,?,?,?,?,?)",
-    (str(uuid.uuid4()),transactionId, groupName, purchaser, debtor, amount, 0, ipAddress,memo))
+    conn.execute("INSERT INTO Transactions(id,transaction_id,group_name,purchaser,debtor,amount,is_paid,memo,ip_addr) VALUES (?,?,?,?,?,?,?,?,?)",
+                 (str(uuid.uuid4()), transactionId, groupName, purchaser, debtor, amount, 0, memo, ip))
     conn.commit()
     conn.close()
 
+
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+def get_db_rows(transactionId):
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = dict_factory
+    cursor = conn.execute(
+        "SELECT * FROM Transactions WHERE transaction_id = ?", (transactionId,))
+    rows = cursor.fetchall()
+    return rows
+
+
 def generate_report(groupName, resetTab):
     conn = sqlite3.connect('database.db')
-    cursor = conn.execute("SELECT * FROM Transactions WHERE group_name = ? and is_paid= ?", (groupName,0))
+    cursor = conn.execute(
+        "SELECT * FROM Transactions WHERE group_name = ? and is_paid= ?", (groupName, 0))
     punnett = {}
     for payment in cursor.fetchall():
         debtor = payment[4]
@@ -68,13 +96,14 @@ def generate_report(groupName, resetTab):
                 recipientDebt = punnett[recipient][debtor]
                 recipientDebtAfterTransaction = amount - recipientDebt
                 if recipientDebtAfterTransaction < 0:
-                    #set debtor amount to 0
+                    # set debtor amount to 0
                     if debtor in punnett:
                         punnett[debtor][recipient] = 0
-                    #set the recipient debt to abs(recipientDebtAfterTransaction)
-                    punnett[recipient][debtor] = abs(recipientDebtAfterTransaction)
+                    # set the recipient debt to abs(recipientDebtAfterTransaction)
+                    punnett[recipient][debtor] = abs(
+                        recipientDebtAfterTransaction)
                 elif recipientDebtAfterTransaction > 0:
-                    #set the debtor amount to recipentDebtAfterTransaction
+                    # set the debtor amount to recipentDebtAfterTransaction
                     if debtor not in punnett:
                         punnett[debtor] = {
                             str(recipient).lower(): 0
@@ -83,15 +112,15 @@ def generate_report(groupName, resetTab):
                         punnett[debtor][recipient] += recipientDebtAfterTransaction
                     else:
                         punnett[debtor][recipient] = recipientDebtAfterTransaction
-                    #set the recipient amount to 0
+                    # set the recipient amount to 0
                     punnett[recipient][debtor] = 0
                 else:
-                    #set both to 0
+                    # set both to 0
                     punnett[recipient][debtor] = 0
                     if debtor in punnett:
                         punnett[debtor][recipient] = 0
                 continue
-                
+
         if debtor not in punnett:
             punnett[debtor] = {
                 str(recipient).lower(): amount
@@ -106,10 +135,12 @@ def generate_report(groupName, resetTab):
     for debtor in punnett:
         for recipient in punnett[debtor]:
             if punnett[debtor][recipient] > 0:
-                output.append(debtor + " owes " + recipient + " $" + str(round(punnett[debtor][recipient], 2)))
-    
+                output.append(debtor + " owes " + recipient +
+                              " $" + str(round(punnett[debtor][recipient], 2)))
+
     if (resetTab):
-        conn.execute("UPDATE Transactions SET is_paid = 1 WHERE group_name = ?", (groupName,))
+        conn.execute(
+            "UPDATE Transactions SET is_paid = 1 WHERE group_name = ?", (groupName,))
         conn.commit()
     conn.close()
-    return output
+    return {'report': output}
