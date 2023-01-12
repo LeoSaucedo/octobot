@@ -58,8 +58,6 @@ const Tab1: React.FC = () => {
 
   const [presentAlert] = useIonAlert();
 
-  const [ip, setIp] = useState<string>("");
-
   const [responses, setResponses] = useState<ResponseObj[]>([]);
   let initialValues = {
     group: "",
@@ -124,11 +122,12 @@ const Tab1: React.FC = () => {
           className="ion-padding"
           onSubmit={handleSubmit(async (data) => {
             console.log(data);
-            if (ip == "") {
-              await fetch("https://ipapi.co/json/")
-                .then((response) => response.json())
-                .then((data) => setIp(data.ip));
-            }
+            var ip_info = await fetch("https://ipapi.co/json/")
+              .then((res) => res.json())
+              .catch((error) => {
+                console.log(error);
+              });
+            console.log(ip_info);
             var transaction: Transaction = {
               group: data.group.toLowerCase(),
               payer: data.payer.toLowerCase(),
@@ -136,7 +135,7 @@ const Tab1: React.FC = () => {
               tax: parseFloat(data.tax),
               tip: parseFloat(data.tip),
               memo: data.memo,
-              ip: ip,
+              ip: ip_info.ip,
               participants: data.participants.map((participant) => {
                 return {
                   name: participant.name.toLowerCase(),
