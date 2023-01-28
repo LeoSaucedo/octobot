@@ -31,8 +31,10 @@ def add_transaction(payload):
     rats = []
     for participant in payload["participants"]:
         if participant['amount'] == "":
+            participant["amount"] = 0
             splitters.append(participant)
         else:
+            participant["amount"] = 0
             rats.append(participant)
 
     tax_percent = float(payload["tax"]) / float(payload["subtotal"])
