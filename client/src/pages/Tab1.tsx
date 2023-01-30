@@ -32,6 +32,7 @@ import postTransaction, { Transaction } from "../api/TransactionApi";
 import { ResponseObj } from "../api/TransactionApi";
 import { report } from "process";
 import { Preferences } from "@capacitor/preferences";
+import { v4 as uuidv4 } from "uuid";
 
 type FormValues = {
   group: string;
@@ -129,6 +130,7 @@ const Tab1: React.FC = () => {
               });
             console.log(ip_info);
             var transaction: Transaction = {
+              id: uuidv4(),
               group: data.group.toLowerCase(),
               payer: data.payer.toLowerCase(),
               subtotal: parseFloat(data.subtotal),

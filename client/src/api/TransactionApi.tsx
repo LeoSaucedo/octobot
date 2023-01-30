@@ -1,4 +1,5 @@
 export class Transaction {
+  id: string = "";
   group: string = "";
   payer: string = "";
   subtotal: number = 0;
