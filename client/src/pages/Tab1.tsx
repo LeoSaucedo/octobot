@@ -218,6 +218,7 @@ const Tab1: React.FC = () => {
             <IonLabel>Memo</IonLabel>
             <IonInput
               required={true}
+              placeholder="What's it for?"
               {...register(`memo`, { required: true })}
             ></IonInput>
           </IonItem>
