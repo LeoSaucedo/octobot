@@ -241,7 +241,7 @@ def generate_report(group_name, reset_tab):
                     # If the debtor is not in the debtor_dict, add them
                     if debtor not in debtor_dict:
                         debtor_dict[debtor] = {
-                            str(recipient).lower(): 0
+                            str(recipient): 0
                         }
                     # Set the debtor amount to debtor_debt_after_transaction
                     debtor_dict[debtor][recipient] = debtor_debt_after_transaction
@@ -260,7 +260,7 @@ def generate_report(group_name, reset_tab):
         # And set their debt to the amount.
         if debtor not in debtor_dict:
             debtor_dict[debtor] = {
-                str(recipient).lower(): amount
+                str(recipient): amount
             }
         # If the debtor is already in the debtor dict, add the amount to their debt.
         else:
