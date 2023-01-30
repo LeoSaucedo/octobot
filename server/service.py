@@ -20,6 +20,7 @@ def add_transaction(payload):
         "tip": "0",
         "memo": "sentra Uber",
         "ip": "0.0.0.0",
+        "id": "a47d84fe-612b-45d6-a18e-b45c731d5b22",
         "participants": [
             {
                 "name": "cheryl",
@@ -42,11 +43,11 @@ def add_transaction(payload):
         payload["tax"] = 0
     if payload["tip"] is None:
         payload["tip"] = 0
-    if payload["ip"] is None:
+    if "ip" not in payload or payload["ip"] is None:
         payload["ip"] = ""
-
-    # Generate transaction ID
-    transaction_id = str(uuid.uuid4())
+    if "id" not in payload:
+        # If id is not present in the payload, generate one.
+        payload["id"] = str(uuid.uuid4())
 
     # Check if participants contains the payer name.
     # Set default values for blank participant amounts.
@@ -95,7 +96,7 @@ def add_transaction(payload):
         # E.g. Cheryl owes Cheryl $10.00
         if uneven_split_participant["name"] == payload["payer"]:
             continue
-        insert_transaction(transaction_id, payload["group"], payload["payer"],
+        insert_transaction(payload["id"], payload["group"], payload["payer"],
                            uneven_split_participant["name"], amount, payload["memo"], payload["ip"])
 
     # Calculate the amount each even splitter owes.
@@ -111,10 +112,10 @@ def add_transaction(payload):
         # Don't add the participant to the database if they are the payer.
         if even_split_participant["name"] == payload["payer"]:
             continue
-        insert_transaction(transaction_id, payload["group"], payload["payer"],
+        insert_transaction(payload["id"], payload["group"], payload["payer"],
                            even_split_participant["name"], even_split_amount, payload["memo"], payload["ip"])
 
-    return transaction_id
+    return payload["id"]
 
 
 def insert_transaction(transaction_id, group_name, purchaser, debtor, amount, memo, ip):
@@ -240,7 +241,7 @@ def generate_report(group_name, reset_tab):
                     # If the debtor is not in the debtor_dict, add them
                     if debtor not in debtor_dict:
                         debtor_dict[debtor] = {
-                            str(recipient).lower(): 0
+                            str(recipient): 0
                         }
                     # Set the debtor amount to debtor_debt_after_transaction
                     debtor_dict[debtor][recipient] = debtor_debt_after_transaction
@@ -259,7 +260,7 @@ def generate_report(group_name, reset_tab):
         # And set their debt to the amount.
         if debtor not in debtor_dict:
             debtor_dict[debtor] = {
-                str(recipient).lower(): amount
+                str(recipient): amount
             }
         # If the debtor is already in the debtor dict, add the amount to their debt.
         else:

@@ -60,7 +60,7 @@ const Tab2: React.FC = () => {
   });
   const onSubmit = async (data: any) => {
     if (await isAuthenticated()) {
-      await getReport(data.group, data.reset)
+      await getReport(data.group.toLowerCase().trim(), data.reset)
         .then((response) => {
           handleToggle();
           setReport(response);

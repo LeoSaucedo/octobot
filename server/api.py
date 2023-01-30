@@ -48,6 +48,7 @@ def transaction():
         "tip": "0",
         "memo": "sentra Uber",
         "ip": "0.0.0.0",
+        "id": "a47d84fe-612b-45d6-a18e-b45c731d5b22",
         "participants": [
             {
                 "name": "cheryl",
@@ -68,5 +69,5 @@ def transaction():
         return 'Bad Request', 400
     transactionId = service.add_transaction(data)
     rows = service.get_db_rows(transactionId)
-    print(rows)
+    print("Response content: " + str(rows))
     return rows

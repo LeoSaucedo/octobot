@@ -32,6 +32,7 @@ import postTransaction, { Transaction } from "../api/TransactionApi";
 import { ResponseObj } from "../api/TransactionApi";
 import { report } from "process";
 import { Preferences } from "@capacitor/preferences";
+import { v4 as uuidv4 } from "uuid";
 
 type FormValues = {
   group: string;
@@ -129,8 +130,9 @@ const Tab1: React.FC = () => {
               });
             console.log(ip_info);
             var transaction: Transaction = {
-              group: data.group.toLowerCase(),
-              payer: data.payer.toLowerCase(),
+              id: uuidv4(),
+              group: data.group.toLowerCase().trim(),
+              payer: data.payer.toLowerCase().trim(),
               subtotal: parseFloat(data.subtotal),
               tax: parseFloat(data.tax),
               tip: parseFloat(data.tip),
@@ -138,7 +140,7 @@ const Tab1: React.FC = () => {
               ip: ip_info.ip,
               participants: data.participants.map((participant) => {
                 return {
-                  name: participant.name.toLowerCase(),
+                  name: participant.name.toLowerCase().trim(),
                   amount: parseFloat(participant.amount),
                 };
               }),
