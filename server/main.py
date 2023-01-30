@@ -4,6 +4,10 @@ import sqlite3
 import api
 from flask_cors import CORS
 
+import functools
+
+print = functools.partial(print, flush=True)
+
 app = Flask(__name__)
 cors = CORS(app)
 app.register_blueprint(api.api)

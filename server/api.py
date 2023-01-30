@@ -1,6 +1,9 @@
 from flask import Blueprint, request, render_template
 import service
 from flask_cors import cross_origin
+import functools
+
+print = functools.partial(print, flush=True)
 
 api = Blueprint('api', __name__)
 
@@ -24,6 +27,8 @@ def report(group_name):
     :return: The report for the group
     '''
     reset = request.args.get('reset', 'false')
+    print("Incoming request for report for group: " +
+          str(group_name) + " with reset: " + str(reset))
     if reset not in ['true', 'false']:
         return 'Bad Request', 400
     report = service.generate_report(group_name, reset == 'true')
@@ -58,7 +63,7 @@ def transaction():
     :return: TransactionId of the transaction that was added
     '''
     data = request.get_json()
-    print("Incoming request with payload " + str(data))
+    print("Incoming request with payload: " + str(data))
     if data is None:
         return 'Bad Request', 400
     transactionId = service.add_transaction(data)
