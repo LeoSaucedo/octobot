@@ -1,6 +1,10 @@
 import sqlite3
 import uuid
 
+import functools
+
+print = functools.partial(print, flush=True)
+
 
 def add_transaction(payload):
     '''

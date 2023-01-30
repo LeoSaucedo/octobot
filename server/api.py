@@ -1,6 +1,9 @@
 from flask import Blueprint, request, render_template
 import service
 from flask_cors import cross_origin
+import functools
+
+print = functools.partial(print, flush=True)
 
 api = Blueprint('api', __name__)
 
@@ -58,7 +61,7 @@ def transaction():
     :return: TransactionId of the transaction that was added
     '''
     data = request.get_json()
-    print("Incoming request with payload " + str(data))
+    print("Incoming request with payload " + str(data), flush=True)
     if data is None:
         return 'Bad Request', 400
     transactionId = service.add_transaction(data)
