@@ -36,27 +36,29 @@ def transaction():
     This endpoint is used to add a transaction to a group.
     The json body of the request should be in the following format:
     {
-    "group": "Nola",
-    "payer": "Bryan",
-    "subtotal": "100",
-    "tax": "7",
-    "tip": "20",
-    "memo": "food",
-    "debtors": [
-        {
-        "name": "Carlos",
-        "amount": ""
-        },
-        {
-        "name": "Jerm",
-        "amount": "33"
-        }
-        ],
+        "group": "newtest",
+        "payer": "cheryl",
+        "subtotal": "15.91",
+        "tax": "0",
+        "tip": "0",
+        "memo": "sentra Uber",
+        "ip": "0.0.0.0",
+        "participants": [
+            {
+                "name": "cheryl",
+                "amount": ""
+            },
+            {
+                "name": "julene",
+                "amount": ""
+            }
+        ]
+    }
 
     :return: TransactionId of the transaction that was added
     '''
     data = request.get_json()
-    print(data)
+    print("Incoming request with payload " + str(data))
     if data is None:
         return 'Bad Request', 400
     transactionId = service.add_transaction(data)
