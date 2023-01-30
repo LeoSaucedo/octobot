@@ -7,5 +7,6 @@ CREATE TABLE Transactions (
   amount real not null,
   is_paid boolean not null,
   memo text not null,
-  ip_addr text not null
+  ip_addr text not null,
+  timestamp datetime default current_timestamp
 );
