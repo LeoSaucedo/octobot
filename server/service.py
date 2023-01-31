@@ -126,7 +126,6 @@ def insert_transaction(transaction_id, group_name, purchaser, debtor, amount, me
     conn.execute("INSERT INTO Transactions(id,transaction_id,group_name,purchaser,debtor,amount,is_paid,memo,ip_addr) VALUES (?,?,?,?,?,?,?,?,?)",
                  (str(uuid.uuid4()), transaction_id, group_name, purchaser, debtor, amount, 0, memo, ip))
     conn.commit()
-    conn.close()
 
 
 def dict_factory(cursor, row):

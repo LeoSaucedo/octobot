@@ -22,7 +22,7 @@ create_table = '''
 def setup_db():
     # sqlite here
     # Create a database in RAM
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('database.db')
     print("Running setup db")
     # Create a table
     conn.execute(create_table)
@@ -61,12 +61,13 @@ def test_add_transaction_success(Payload, mocker):
     mocker.patch(
         'sqlite3.connect', return_value=conn
     )
-    # mocker.patch(
-    #     'sqlite3.connect.close', dumb_func()
-    # )
+
     out = service.add_transaction(Payload)
     time.sleep(1)
-    newconn = sqlite3.connect('test.dba')
+    newconn = sqlite3.connect('database.db')
     output = newconn.execute("select * from Transactions")
-    print("This is output" + str(output.fetchone()))
+
     assert out != None
+    # add other assert here
+
+
