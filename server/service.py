@@ -243,8 +243,12 @@ def generate_report(group_name, reset_tab):
                         debtor_dict[debtor] = {
                             str(recipient): 0
                         }
-                    # Set the debtor amount to debtor_debt_after_transaction
-                    debtor_dict[debtor][recipient] = debtor_debt_after_transaction
+                    if recipient in debtor_dict[debtor]:
+                        # If the recipient is in the debtor's dictionary, add the amount to their debt.
+                        debtor_dict[debtor][recipient] += debtor_debt_after_transaction
+                    else:
+                        # Set the debtor amount to debtor_debt_after_transaction
+                        debtor_dict[debtor][recipient] = debtor_debt_after_transaction
 
                     # set the recipient amount to 0
                     debtor_dict[recipient][debtor] = 0
