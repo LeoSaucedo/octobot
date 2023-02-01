@@ -10,3 +10,12 @@ CREATE TABLE Transactions (
   ip_addr text not null,
   timestamp datetime default current_timestamp
 );
+
+CREATE TABLE transaction_audit (
+  id uuid not null primary key,
+  transaction_id not null,
+  request text not null,
+  status text not null,
+  error_msg text,
+  timestamp datetime default current_timestamp
+);

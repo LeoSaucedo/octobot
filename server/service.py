@@ -1,5 +1,6 @@
 import sqlite3
 import uuid
+import json
 
 import functools
 
@@ -38,83 +39,93 @@ def add_transaction(payload):
 
     print("Inside add transaction function with payload: " + str(payload))
 
-    # Fill any missing values with default values
-    if payload["tax"] is None:
-        payload["tax"] = 0
-    if payload["tip"] is None:
-        payload["tip"] = 0
-    if "ip" not in payload or payload["ip"] is None:
-        payload["ip"] = ""
-    if "id" not in payload:
-        # If id is not present in the payload, generate one.
-        payload["id"] = str(uuid.uuid4())
+    print("Validating payload")
+    validate_payload(payload)
 
-    # Check if participants contains the payer name.
-    # Set default values for blank participant amounts.
-    payer_in_participants = False
-    for participant in payload["participants"]:
-        if participant["amount"] is None:
-            participant["amount"] = ""
-        if (participant["name"] == payload["payer"]):
-            payer_in_participants = True
+    audit_id = audit_request(payload=payload, status="IN_PROGRESS")
+    try:
+        # Fill any missing values with default values
+        if payload["tax"] is None:
+            payload["tax"] = 0
+        if payload["tip"] is None:
+            payload["tip"] = 0
+        if "ip" not in payload or payload["ip"] is None:
+            payload["ip"] = ""
+        if "id" not in payload:
+            # If id is not present in the payload, generate one.
+            payload["id"] = str(uuid.uuid4())
 
-    # If the payer is not in the participants list, add them.
-    if (payer_in_participants == False):
-        participant = {
-            "name": payload["payer"],
-            "amount": ""
-        }
-        payload["participants"].append(participant)
+        # Check if participants contains the payer name.
+        # Set default values for blank participant amounts.
+        payer_in_participants = False
+        for participant in payload["participants"]:
+            if participant["amount"] is None:
+                participant["amount"] = ""
+            if (participant["name"] == payload["payer"]):
+                payer_in_participants = True
 
-    # Initialize variables for each participant type
-    # amount = None
-    even_split_participants = []
-    uneven_split_participants = []
+        # If the payer is not in the participants list, add them.
+        if (payer_in_participants == False):
+            participant = {
+                "name": payload["payer"],
+                "amount": ""
+            }
+            payload["participants"].append(participant)
 
-    # Sort each participant into their respective type
-    for participant in payload["participants"]:
-        if participant['amount'] == "" or participant['amount'] is None:
-            even_split_participants.append(participant)
-        else:
-            uneven_split_participants.append(participant)
+        # Initialize variables for each participant type
+        # amount = None
+        even_split_participants = []
+        uneven_split_participants = []
 
-    tax_percent = float(payload["tax"]) / float(payload["subtotal"])
-    tip_percent = float(payload["tip"]) / float(payload["subtotal"])
+        # Sort each participant into their respective type
+        for participant in payload["participants"]:
+            if participant['amount'] == "" or participant['amount'] is None:
+                even_split_participants.append(participant)
+            else:
+                uneven_split_participants.append(participant)
 
-    # Total amount owed by uneven splitters
-    total_uneven_split_amount = 0
+        tax_percent = float(payload["tax"]) / float(payload["subtotal"])
+        tip_percent = float(payload["tip"]) / float(payload["subtotal"])
 
-    # Iterate through the uneven splitters.
-    # Calculate the amount each participant owes, and adding their tax and tip.
-    # Add the transaction to the database.
-    for uneven_split_participant in uneven_split_participants:
-        amount = float(uneven_split_participant["amount"])+(float(uneven_split_participant["amount"])
-                                                            * tax_percent)+(float(uneven_split_participant["amount"])*tip_percent)
-        total_uneven_split_amount += amount
+        # Total amount owed by uneven splitters
+        total_uneven_split_amount = 0
 
-        # Don't add the participant to the database if they are the payer.
-        # E.g. Cheryl owes Cheryl $10.00
-        if uneven_split_participant["name"] == payload["payer"]:
-            continue
-        insert_transaction(payload["id"], payload["group"], payload["payer"],
-                           uneven_split_participant["name"], amount, payload["memo"], payload["ip"])
+        # Iterate through the uneven splitters.
+        # Calculate the amount each participant owes, and adding their tax and tip.
+        # Add the transaction to the database.
+        for uneven_split_participant in uneven_split_participants:
+            amount = float(uneven_split_participant["amount"])+(float(uneven_split_participant["amount"])
+                                                                * tax_percent)+(float(uneven_split_participant["amount"])*tip_percent)
+            total_uneven_split_amount += amount
 
-    # Calculate the amount each even splitter owes.
-    # First, we calculate the total even split amount.
-    # even_split_amount = (total amount - total uneven split amount) / number of even splitters
-    # Set the amount of each even splitter to even_split_amount.
-    # And add the transaction to the database.
-    if len(even_split_participants) > 0:
-        even_split_amount = ((float(payload["subtotal"]) + float(payload["tax"]) + float(
-            payload["tip"])) - total_uneven_split_amount) / len(even_split_participants)
+            # Don't add the participant to the database if they are the payer.
+            # E.g. Cheryl owes Cheryl $10.00
+            if uneven_split_participant["name"] == payload["payer"]:
+                continue
+            insert_transaction(payload["id"], payload["group"], payload["payer"],
+                               uneven_split_participant["name"], amount, payload["memo"], payload["ip"])
 
-    for even_split_participant in even_split_participants:
-        # Don't add the participant to the database if they are the payer.
-        if even_split_participant["name"] == payload["payer"]:
-            continue
-        insert_transaction(payload["id"], payload["group"], payload["payer"],
-                           even_split_participant["name"], even_split_amount, payload["memo"], payload["ip"])
+        # Calculate the amount each even splitter owes.
+        # First, we calculate the total even split amount.
+        # even_split_amount = (total amount - total uneven split amount) / number of even splitters
+        # Set the amount of each even splitter to even_split_amount.
+        # And add the transaction to the database.
+        if len(even_split_participants) > 0:
+            even_split_amount = ((float(payload["subtotal"]) + float(payload["tax"]) + float(
+                payload["tip"])) - total_uneven_split_amount) / len(even_split_participants)
 
+        for even_split_participant in even_split_participants:
+            # Don't add the participant to the database if they are the payer.
+            if even_split_participant["name"] == payload["payer"]:
+                continue
+            insert_transaction(payload["id"], payload["group"], payload["payer"],
+                               even_split_participant["name"], even_split_amount, payload["memo"], payload["ip"])
+    except Exception as e:
+        print("Exception occurred while processing transaction: " + str(e))
+        audit_request(payload=payload, status="FAILED",
+                      audit_id=audit_id, error_msg=str(e))
+        raise e
+    audit_request(payload=payload, status="SUCCESS", audit_id=audit_id)
     return payload["id"]
 
 
@@ -294,3 +305,42 @@ def generate_report(group_name, reset_tab):
         conn.commit()
     conn.close()
     return output
+
+
+def validate_payload(payload):
+    '''
+    Validates the request payload to ensure values are correct.
+    If a validation fails, we will raise an exception and pass it on to the caller.
+    '''
+    # Check that participant amounts add up to <= subtotal.
+    sum = 0
+    for participant in payload['participants']:
+        amount = participant['amount']
+        sum += amount if amount is not None else 0
+    if sum > payload['subtotal']:
+        raise Exception(
+            "Participant amounts add up to more than the subtotal.")
+
+
+def audit_request(payload, status, audit_id=str(uuid.uuid4()), error_msg=None):
+    '''
+    Adds the request to the audit table.
+    The schema for the audit table is as follows:
+        id uuid not null primary key,
+        transaction_id not null,
+        request text not null,
+        status text not null,
+        error_msg text,
+        timestamp datetime default current_timestamp
+    We will first search for the transaction id in the audit table.
+    If it exists, we will update the status and error_msg.
+    If it does not exist, we will insert a new row.
+    Then, we will return the audit id.
+    '''
+    print("Adding request to audit table with id: " + audit_id)
+    conn = sqlite3.connect('database.db')
+    conn.execute(
+        "REPLACE INTO transaction_audit(id, transaction_id, request, status, error_msg) VALUES (?, ?, ?, ?, ?)",
+        (audit_id, payload['id'], json.dumps(payload), status, error_msg))
+    conn.commit()
+    return audit_id
