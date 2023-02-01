@@ -45,7 +45,21 @@ async function postTransaction(
     },
     body: JSON.stringify(transaction),
   })
-    .then((res) => res.json())
+    .then(async (res) => {
+      // If the response is not 200, throw an error.
+      if (res.status != 200) {
+        // If the response has a body, throw an error with the body as the message.
+        if (res.body != null) {
+          // Throw a new error with the body of the request as the message.
+          var errorText = await res.text();
+          throw new Error(errorText);
+        } else {
+          // Otherwise, throw a new error with the status text as the message.
+          throw new Error(res.statusText);
+        }
+      }
+      return res.json();
+    })
     .then((res) => {
       console.log("Success:", res);
       response = res;

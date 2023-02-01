@@ -158,7 +158,7 @@ const Tab1: React.FC = () => {
                 .catch((error) => {
                   presentAlert({
                     header: "Error",
-                    message: error,
+                    message: error.message,
                     buttons: ["OK"],
                   });
                 });
@@ -231,7 +231,7 @@ const Tab1: React.FC = () => {
           </IonItem>
           {fields.map((field, index) => {
             return (
-              <section key={index}>
+              <section key={field.id}>
                 <IonItem>
                   <IonInput
                     placeholder="Name"

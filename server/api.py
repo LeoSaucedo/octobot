@@ -2,6 +2,7 @@ from flask import Blueprint, request, render_template
 import service
 from flask_cors import cross_origin
 import functools
+import traceback
 
 print = functools.partial(print, flush=True)
 
@@ -64,10 +65,16 @@ def transaction():
     :return: TransactionId of the transaction that was added
     '''
     data = request.get_json()
+    response = None
     print("Incoming request with payload: " + str(data))
     if data is None:
-        return 'Bad Request', 400
-    transactionId = service.add_transaction(data)
+        response = 'Bad Request', 400
+    try:
+        transactionId = service.add_transaction(data)
+    except Exception as e:
+        # Print error with stack trace
+        print(traceback.format_exc())
+        return str(e), 400
     rows = service.get_db_rows(transactionId)
     print("Response content: " + str(rows))
     return rows
