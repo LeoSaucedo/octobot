@@ -287,5 +287,4 @@ def generate_report(group_name, reset_tab):
         conn.execute(
             "UPDATE Transactions SET is_paid = 1 WHERE group_name = ?", (group_name,))
         conn.commit()
-    conn.close()
     return output

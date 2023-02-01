@@ -46,7 +46,6 @@ def transaction():
         cursor = conn.execute(
             "SELECT * FROM Transactions WHERE transaction_id = ?", (transactionId,))
         rows = cursor.fetchall()
-        conn.close()
         print(payload)
         return render_template("confirmation.html", payload=payload, calculations=str(rows), transactionId=transactionId)
     return render_template("transaction.html")
