@@ -59,8 +59,11 @@ const Tab1: React.FC = () => {
 
   const [presentAlert] = useIonAlert();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [responses, setResponses] = useState<ResponseObj[]>([]);
   let initialValues = {
+    isSubmitting: false,
     group: "",
     payer: "",
     subtotal: "",
@@ -81,6 +84,7 @@ const Tab1: React.FC = () => {
     formState: { errors },
     handleSubmit,
     control,
+    watch,
   } = useForm({
     defaultValues: { ...initialValues },
   });
@@ -122,6 +126,7 @@ const Tab1: React.FC = () => {
         <form
           className="ion-padding"
           onSubmit={handleSubmit(async (data) => {
+            setIsSubmitting(true);
             console.log(data);
             var ip_info = await fetch("https://ipapi.co/json/")
               .then((res) => res.json())
@@ -161,6 +166,9 @@ const Tab1: React.FC = () => {
                     message: error.message,
                     buttons: ["OK"],
                   });
+                })
+                .finally(() => {
+                  setIsSubmitting(false);
                 });
             } else {
               presentAlert({
@@ -280,7 +288,12 @@ const Tab1: React.FC = () => {
             </IonButton>
           </IonItem>
           <IonText color="danger">{errors.participants?.root?.message}</IonText>
-          <IonButton className="ion-margin-top" type="submit" expand="block">
+          <IonButton
+            className="ion-margin-top"
+            type="submit"
+            expand="block"
+            disabled={isSubmitting}
+          >
             {" "}
             Submit
           </IonButton>

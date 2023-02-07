@@ -42,7 +42,8 @@ def add_transaction(payload):
     print("Validating payload")
     validate_payload(payload)
 
-    audit_id = audit_request(payload=payload, status="IN_PROGRESS")
+    audit_id = audit_request(payload=payload, audit_id=str(
+        uuid.uuid4()), status="IN_PROGRESS")
     try:
         # Fill any missing values with default values
         if payload["tax"] is None:
@@ -322,7 +323,7 @@ def validate_payload(payload):
             "Participant amounts add up to more than the subtotal.")
 
 
-def audit_request(payload, status, audit_id=str(uuid.uuid4()), error_msg=None):
+def audit_request(payload, status, audit_id, error_msg=None):
     '''
     Adds the request to the audit table.
     The schema for the audit table is as follows:
