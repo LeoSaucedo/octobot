@@ -181,7 +181,7 @@ def generate_report(group_name, reset_tab):
     A 2-D Dictionary containing the debtor and the amount they owe each recipient.
     Example:
     {
-        "julene": 
+        "julene":
             {
                 "cheryl": 7.955,
                 "david": 56.75
@@ -318,7 +318,7 @@ def validate_payload(payload):
     for participant in payload['participants']:
         amount = participant['amount']
         sum += amount if amount is not None else 0
-    if sum > payload['subtotal']:
+    if round(sum, 2) > payload['subtotal']:
         raise Exception(
             "Participant amounts add up to more than the subtotal.")
 
