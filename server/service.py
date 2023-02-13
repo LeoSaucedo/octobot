@@ -39,11 +39,12 @@ def add_transaction(payload):
 
     print("Inside add transaction function with payload: " + str(payload))
 
+    audit_id = audit_request(payload=payload, audit_id=str(
+        uuid.uuid4()), status="IN_PROGRESS")
+
     print("Validating payload")
     validate_payload(payload)
 
-    audit_id = audit_request(payload=payload, audit_id=str(
-        uuid.uuid4()), status="IN_PROGRESS")
     try:
         # Fill any missing values with default values
         if payload["tax"] is None:
