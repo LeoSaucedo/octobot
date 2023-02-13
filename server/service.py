@@ -42,10 +42,9 @@ def add_transaction(payload):
     audit_id = audit_request(payload=payload, audit_id=str(
         uuid.uuid4()), status="IN_PROGRESS")
 
-    print("Validating payload")
-    validate_payload(payload)
-
     try:
+        print("Validating payload")
+        validate_payload(payload)
         # Fill any missing values with default values
         if payload["tax"] is None:
             payload["tax"] = 0
