@@ -33,7 +33,8 @@ def report(group_name):
     if reset not in ['true', 'false']:
         return 'Bad Request', 400
     report = service.generate_report(group_name, reset == 'true')
-    return {"report": report}
+    transactions = service.get_transactions(group_name)
+    return {"report": report, "transactions": transactions}
 
 
 @api.route('/api/transaction', methods=['POST'])

@@ -130,6 +130,52 @@ def add_transaction(payload):
     return payload["id"]
 
 
+def get_transactions(group_name):
+    '''
+    Get all transactions for a given group.
+    :return: List of transactions for the given group.
+    '''
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = dict_factory
+    cursor = conn.cursor()
+    cursor.execute("select transaction_id, purchaser, debtor, amount, memo from Transactions where group_name=? and is_paid=0 order by transaction_id",
+                   (group_name,))
+    raw_transactions = cursor.fetchall()
+    conn.close()
+    '''
+    transaction object.
+    "transactions": [
+        {
+            "id": "abc",
+            "purchaser": "cheryl",
+            "memo": "sentra Uber",
+            "participants": [
+                {
+                    "name": "julene",
+                    "amount": 25
+                }
+            ]
+        }
+    ]
+    '''
+    transactions = []
+    for raw_transaction in raw_transactions:
+        transaction_id = raw_transaction['transaction_id']
+        # Check to see if the transaction has already been added to the list.
+        # If it has, add the debtor to the list of participants.
+        # If it hasn't, create a new transaction object and add it to the list.
+        transaction_exists = False
+        for transaction in transactions:
+            if transaction["id"] == transaction_id:
+                transaction_exists = True
+                transaction["participants"].append(
+                    {"name": raw_transaction["debtor"], "amount": raw_transaction["amount"]})
+        if transaction_exists == False:
+            transactions.append(
+                {"id": transaction_id, "purchaser": raw_transaction["purchaser"], "memo": raw_transaction["memo"], "participants": [{"name": raw_transaction["debtor"], "amount": raw_transaction["amount"]}]})
+    return transactions
+
+
 def insert_transaction(transaction_id, group_name, purchaser, debtor, amount, memo, ip):
     '''
     Insert transaction into the database
