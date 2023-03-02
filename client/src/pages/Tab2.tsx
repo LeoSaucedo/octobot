@@ -13,7 +13,6 @@ import {
   IonCardTitle,
   IonButton,
   IonCheckbox,
-  IonList,
   useIonAlert,
 } from "@ionic/react";
 import "./Tab2.css";
@@ -25,7 +24,9 @@ import { Preferences } from "@capacitor/preferences";
 
 const Tab2: React.FC = () => {
   const [hasClicked, setHasClicked] = useState(false);
-  const [showHide, setShowHide] = useState(false);
+  const [showHideTotals, setShowHideTotals] = useState(false);
+  const [showHideTransactions, setShowHideTransactions] = useState(false);
+
   const [groupName, setGroupName] = useState("");
 
   const [report, setReport] = useState(new Report());
@@ -34,7 +35,7 @@ const Tab2: React.FC = () => {
 
   const handleToggle = () => {
     if (!hasClicked) {
-      setShowHide(!showHide);
+      setShowHideTotals(!showHideTotals);
       setHasClicked(true);
     }
   };
@@ -150,21 +151,56 @@ const Tab2: React.FC = () => {
           </IonButton>
         </form>
         {/* show report in card */}
-        {showHide ? (
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>{groupName}</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              {report.report.map((item, i) => (
-                <div key={i}>
-                  <li>{item}</li>
-                </div>
-              ))}
-            </IonCardContent>
-          </IonCard>
+        {showHideTotals ? (
+          <>
+            <IonCard>
+              <IonCardHeader>
+                <IonCardTitle>{groupName} Totals</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent>
+                {report.report.map((reportLine, i) => (
+                  <div key={i}>
+                    <li>{reportLine}</li>
+                  </div>
+                ))}
+              </IonCardContent>
+            </IonCard>
+            <div className="ion-padding">
+              <IonButton
+                className="ion-margin-top"
+                expand="block"
+                onClick={() => setShowHideTransactions(!showHideTransactions)}
+              >
+                Toggle Individual Transactions
+              </IonButton>
+            </div>
+            {showHideTransactions ? (
+              <>
+                {report.transactions.map((transaction, i) => (
+                  <IonCard>
+                    <IonCardHeader>
+                      <IonCardTitle>{transaction.memo}</IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      {transaction.participants.map((participant, i) => (
+                        <div key={i}>
+                          <li>
+                            {participant.name} owes {transaction.purchaser}
+                            {" $"}
+                            {participant.amount.toFixed(2)}
+                          </li>
+                        </div>
+                      ))}
+                    </IonCardContent>
+                  </IonCard>
+                ))}
+              </>
+            ) : (
+              <></>
+            )}
+          </>
         ) : (
-          <span></span>
+          <></>
         )}
       </IonContent>
     </IonPage>
