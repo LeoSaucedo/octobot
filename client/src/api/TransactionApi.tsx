@@ -21,9 +21,41 @@ export class ResponseObj {
   group_name: string = "";
   id: string = "";
   is_paid: number = 0;
+  is_deleted: number = 0;
   memo: string = "";
   purchaser: string = "";
   transaction_id: string = "";
+}
+
+/**
+ * Deletes a transaction from the API.
+ * @param transactionId The transaction ID to delete.
+ */
+async function deleteTransaction(transactionId: string): Promise<void> {
+  const url =
+    process.env.REACT_APP_API_ENDPOINT + "/transaction/" + transactionId;
+  console.log("url: " + url);
+  await fetch(url, {
+    method: "DELETE",
+  })
+    .then(async (res) => {
+      // If the response is not 200, throw an error.
+      if (res.status != 200) {
+        // If the response has a body, throw an error with the body as the message.
+        if (res.body != null) {
+          // Throw a new error with the body of the request as the message.
+          var errorText = await res.text();
+          throw new Error(errorText);
+        } else {
+          // Otherwise, throw a new error with the status text as the message.
+          throw new Error(res.statusText);
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      throw error;
+    });
 }
 
 /**
@@ -71,4 +103,9 @@ async function postTransaction(
   return response;
 }
 
-export default postTransaction;
+const transactionApi = {
+  postTransaction,
+  deleteTransaction,
+};
+
+export default transactionApi;

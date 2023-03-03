@@ -28,7 +28,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import "./Tab1.css";
 import { alertCircleOutline, closeCircleOutline } from "ionicons/icons";
 import React, { useState } from "react";
-import postTransaction, { Transaction } from "../api/TransactionApi";
+import transactionApi, { Transaction } from "../api/TransactionApi";
 import { ResponseObj } from "../api/TransactionApi";
 import { report } from "process";
 import { Preferences } from "@capacitor/preferences";
@@ -151,7 +151,8 @@ const Tab1: React.FC = () => {
               }),
             };
             if (await isAuthenticated()) {
-              postTransaction(transaction)
+              transactionApi
+                .postTransaction(transaction)
                 .then((response) => {
                   setResponses(response);
                   console.log(response);

@@ -8,7 +8,8 @@ CREATE TABLE Transactions (
   is_paid boolean not null,
   memo text not null,
   ip_addr text not null,
-  timestamp datetime default current_timestamp
+  timestamp datetime default current_timestamp,
+  is_deleted boolean default 0
 );
 
 CREATE TABLE transaction_audit (

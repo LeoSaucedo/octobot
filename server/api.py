@@ -37,6 +37,19 @@ def report(group_name):
     return {"report": report, "transactions": transactions}
 
 
+@api.route('/api/transaction/<transaction_id>', methods=['DELETE'])
+def delete_transaction(transaction_id):
+    '''
+    This endpoint is used to delete a transaction from a group.
+    Upon success, we will return 204 NO_CONTENT.
+    :param transaction_id: A url parameter representing the id of the transaction to delete
+    :return: NO_CONTENT
+    '''
+    print("Incoming request to delete transaction: " + str(transaction_id))
+    service.delete_transaction(transaction_id)
+    return 'successfully deleted transaction ' + str(transaction_id), 200
+
+
 @api.route('/api/transaction', methods=['POST'])
 def transaction():
     '''

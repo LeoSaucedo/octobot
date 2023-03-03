@@ -14,12 +14,14 @@ import {
   IonButton,
   IonCheckbox,
   useIonAlert,
+  IonCardSubtitle,
 } from "@ionic/react";
 import "./Tab2.css";
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Report } from "../api/ReportApi";
+import { Report, Transaction } from "../api/ReportApi";
 import getReport from "../api/ReportApi";
+import transactionApi from "../api/TransactionApi";
 import { Preferences } from "@capacitor/preferences";
 
 const Tab2: React.FC = () => {
@@ -33,7 +35,10 @@ const Tab2: React.FC = () => {
 
   const [presentAlert] = useIonAlert();
 
-  const handleToggle = () => {
+  /**
+   * shows report totals card on generate report form submission
+   */
+  const handleShowReport = () => {
     if (!hasClicked) {
       setShowHideTotals(!showHideTotals);
       setHasClicked(true);
@@ -55,25 +60,30 @@ const Tab2: React.FC = () => {
     return value !== null;
   }
 
+  async function fetchReport(groupName: string, reset: boolean) {
+    await getReport(groupName.toLowerCase().trim(), reset)
+      .then((response) => {
+        handleShowReport();
+        setReport(response);
+      })
+      .catch((error) => {
+        console.log("failed");
+        presentAlert({
+          header: "Error",
+          message: error,
+          buttons: ["OK"],
+        });
+      });
+  }
+
   const { handleSubmit, control, reset, watch, getValues } = useForm({
     defaultValues: { ...initialValues },
     mode: "onChange",
   });
   const onSubmit = async (data: any) => {
+    setShowHideTransactions(false);
     if (await isAuthenticated()) {
-      await getReport(data.group.toLowerCase().trim(), data.reset)
-        .then((response) => {
-          handleToggle();
-          setReport(response);
-        })
-        .catch((error) => {
-          console.log("failed");
-          presentAlert({
-            header: "Error",
-            message: error,
-            buttons: ["OK"],
-          });
-        });
+      await fetchReport(data.group, data.reset);
       reset(initialValues);
     } else {
       if (data.reset) {
@@ -83,19 +93,7 @@ const Tab2: React.FC = () => {
           buttons: ["OK"],
         });
       } else {
-        await getReport(data.group, false)
-          .then((response) => {
-            handleToggle();
-            setReport(response);
-          })
-          .catch((error) => {
-            console.log("failed");
-            presentAlert({
-              header: "Error",
-              message: error,
-              buttons: ["OK"],
-            });
-          });
+        await fetchReport(data.group, false);
       }
     }
     setGroupName(data.group);
@@ -177,22 +175,57 @@ const Tab2: React.FC = () => {
             {showHideTransactions ? (
               <>
                 {report.transactions.map((transaction, i) => (
-                  <IonCard>
-                    <IonCardHeader>
-                      <IonCardTitle>{transaction.memo}</IonCardTitle>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      {transaction.participants.map((participant, i) => (
-                        <div key={i}>
-                          <li>
-                            {participant.name} owes {transaction.purchaser}
-                            {" $"}
-                            {participant.amount.toFixed(2)}
-                          </li>
-                        </div>
-                      ))}
-                    </IonCardContent>
-                  </IonCard>
+                  <div key={i}>
+                    <IonCard>
+                      <IonCardHeader>
+                        <IonCardTitle>{transaction.memo}</IonCardTitle>
+                        <IonCardSubtitle>
+                          {transaction.timestamp}
+                        </IonCardSubtitle>
+                      </IonCardHeader>
+                      <IonCardContent>
+                        {transaction.participants.map((participant, i) => (
+                          <div key={i}>
+                            <li>
+                              {participant.name} owes {transaction.purchaser}
+                              {" $"}
+                              {participant.amount.toFixed(2)}
+                            </li>
+                          </div>
+                        ))}
+                      </IonCardContent>
+                      <IonButton
+                        fill="clear"
+                        color="danger"
+                        onClick={async () => {
+                          presentAlert({
+                            header: "Delete Transaction",
+                            message:
+                              "Are you sure you want to delete this transaction?",
+                            buttons: [
+                              {
+                                text: "Cancel",
+                                role: "cancel",
+                              },
+                              {
+                                text: "OK",
+                                role: "confirm",
+                                handler: async () => {
+                                  await transactionApi
+                                    .deleteTransaction(transaction.id)
+                                    .then(async () => {
+                                      await fetchReport(groupName, false);
+                                    });
+                                },
+                              },
+                            ],
+                          });
+                        }}
+                      >
+                        Delete Transaction
+                      </IonButton>
+                    </IonCard>
+                  </div>
                 ))}
               </>
             ) : (
