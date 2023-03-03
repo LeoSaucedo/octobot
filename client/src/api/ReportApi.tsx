@@ -6,6 +6,7 @@ export class Report {
 export class Transaction {
   id: string = "";
   memo: string = "";
+  timestamp: string = "";
   purchaser: string = "";
   participants: Participant[] = [];
 }

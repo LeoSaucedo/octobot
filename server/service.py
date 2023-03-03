@@ -130,6 +130,20 @@ def add_transaction(payload):
     return payload["id"]
 
 
+def delete_transaction(transaction_id):
+    '''
+    Delete a transaction from the database.
+    This is achieved by setting is_deleted=1 in the DB.
+    :return: None
+    '''
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute("update Transactions set is_deleted=1 where transaction_id=?",
+                   (transaction_id,))
+    conn.commit()
+    conn.close()
+
+
 def get_transactions(group_name):
     '''
     Get all transactions for a given group.
@@ -138,7 +152,7 @@ def get_transactions(group_name):
     conn = sqlite3.connect('database.db')
     conn.row_factory = dict_factory
     cursor = conn.cursor()
-    cursor.execute("select transaction_id, purchaser, debtor, amount, memo from Transactions where group_name=? and is_paid=0 order by transaction_id",
+    cursor.execute("select transaction_id, purchaser, debtor, amount, memo, timestamp from Transactions where group_name=? and is_paid=0 and is_deleted=0 order by transaction_id",
                    (group_name,))
     raw_transactions = cursor.fetchall()
     conn.close()
@@ -149,6 +163,7 @@ def get_transactions(group_name):
             "id": "abc",
             "purchaser": "cheryl",
             "memo": "sentra Uber",
+            "timestamp": "2019-01-01 12:00:00",
             "participants": [
                 {
                     "name": "julene",
@@ -172,7 +187,7 @@ def get_transactions(group_name):
                     {"name": raw_transaction["debtor"], "amount": raw_transaction["amount"]})
         if transaction_exists == False:
             transactions.append(
-                {"id": transaction_id, "purchaser": raw_transaction["purchaser"], "memo": raw_transaction["memo"], "participants": [{"name": raw_transaction["debtor"], "amount": raw_transaction["amount"]}]})
+                {"id": transaction_id, "purchaser": raw_transaction["purchaser"], "memo": raw_transaction["memo"], "timestamp": raw_transaction["timestamp"], "participants": [{"name": raw_transaction["debtor"], "amount": raw_transaction["amount"]}]})
     return transactions
 
 
@@ -256,12 +271,13 @@ def generate_report(group_name, reset_tab):
     debtor string not null,
     amount real not null,
     is_paid boolean not null,
+    is_deleted boolean not null,
     ip_addr text not null,
     memo text not null
     '''
     conn = sqlite3.connect('database.db')
     cursor = conn.execute(
-        "SELECT * FROM Transactions WHERE group_name = ? and is_paid= ?", (group_name, 0))
+        "SELECT * FROM Transactions WHERE group_name = ? and is_paid = ? and is_deleted = ?", (group_name, 0, 0))
 
     # Array of unpaid transactions for the given group
     transactions = cursor.fetchall()
