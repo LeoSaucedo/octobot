@@ -303,17 +303,21 @@ const Tab1: React.FC = () => {
           <IonCard>
             <IonCardHeader>
               <IonCardTitle>Transaction Summary</IonCardTitle>
-              <IonCardSubtitle>{responses[0].memo}</IonCardSubtitle>
+              <IonCardSubtitle>
+                {responses[0].group_name}: {responses[0].memo}
+              </IonCardSubtitle>
             </IonCardHeader>
             <IonCardContent>
-              {responses.map((response, i) => (
-                <div key={i}>
-                  <li>
-                    {response.debtor} owes {response.purchaser} $
-                    {response.amount.toFixed(2)}.
-                  </li>
-                </div>
-              ))}
+              <IonText>
+                {responses.map((response, i) => (
+                  <div key={i}>
+                    <li>
+                      {response.debtor} owes {response.purchaser} $
+                      {response.amount.toFixed(2)}.
+                    </li>
+                  </div>
+                ))}
+              </IonText>
             </IonCardContent>
           </IonCard>
         ) : (
