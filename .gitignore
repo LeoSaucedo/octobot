@@ -1,6 +1,9 @@
 # VSCode
 .vscode/
 
+# SSH Keys
+.ssh/
+
 # Project-specific
 *.db
 
