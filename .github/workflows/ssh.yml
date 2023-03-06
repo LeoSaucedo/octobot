@@ -20,3 +20,4 @@ jobs:
         script: |
           cd /opt/octobot && git pull
           sudo systemctl restart octobot
+          cd /opt/octobot/client && npm run deploy
