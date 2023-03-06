@@ -17,5 +17,5 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         script: |
-          git pull
+          cd /opt/cgsphoto && git pull
           sudo systemctl restart octobot
