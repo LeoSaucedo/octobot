@@ -16,6 +16,7 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
+        script_stop: true
         script: |
           cd /opt/octobot && git pull
           sudo systemctl restart octobot
