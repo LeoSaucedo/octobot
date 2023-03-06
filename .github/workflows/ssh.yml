@@ -1,8 +1,10 @@
-name: remote ssh command
+name: Deploy to Prod
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
-      - 'main'
+      - 'master'
 jobs:
   build:
     name: Build
@@ -13,5 +15,5 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key_path: ${{ secrets.SSH_KEY }}
+        key: ${{ secrets.SSH_KEY }}
         script: whoami
