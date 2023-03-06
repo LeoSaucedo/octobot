@@ -152,7 +152,7 @@ def get_transactions(group_name):
     conn = sqlite3.connect('database.db')
     conn.row_factory = dict_factory
     cursor = conn.cursor()
-    cursor.execute("select transaction_id, purchaser, debtor, amount, memo, timestamp from Transactions where group_name=? and is_paid=0 and is_deleted=0 order by transaction_id",
+    cursor.execute("select transaction_id, purchaser, debtor, amount, memo, timestamp from Transactions where group_name=? and is_paid=0 and is_deleted=0 order by timestamp desc",
                    (group_name,))
     raw_transactions = cursor.fetchall()
     conn.close()
