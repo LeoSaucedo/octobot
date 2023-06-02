@@ -1,6 +1,7 @@
 import sqlite3
 import uuid
 import json
+import operator
 
 import functools
 
@@ -350,6 +351,9 @@ def generate_report(group_name, reset_tab):
             else:
                 debtor_dict[debtor][recipient] += amount
 
+    # Use our simplification algorithm to reduce the number of overall transactions.
+    debtor_dict = simplify_debts(debtor_dict)
+
     # Set up an array of strings to store the output.
     output = []
     print("Debtor Dict: " + str(debtor_dict))
@@ -370,6 +374,58 @@ def generate_report(group_name, reset_tab):
     return output
 
 
+def simplify_debts(debtor_dict):
+    '''
+    Simplifies the debts in the debtor_dict
+    :param debtor_dict: 2-D Dictionary containing the debtor and the amount they owe each recipient.
+    '''
+    # Create a dictionary to store the absolute values.
+    received_amounts = {}
+    print(debtor_dict)
+    for debtor in debtor_dict:
+        for recipient in debtor_dict[debtor]:
+            if debtor_dict[debtor][recipient] > 0:
+                # If the debtor owes the recipient money
+                # Subtract the owed amount from the debtor and add it to the recipient.
+                if debtor not in received_amounts:
+                    received_amounts[debtor] = 0
+                if recipient not in received_amounts:
+                    received_amounts[recipient] = 0
+                received_amounts[debtor] -= debtor_dict[debtor][recipient]
+                received_amounts[recipient] += debtor_dict[debtor][recipient]
+    debtor_dict.clear()
+    max_recipient = None
+    while (True):
+        output = []
+        max_recipient = max(received_amounts.items(),
+                            key=operator.itemgetter(1))[0]
+        max_debtor = min(received_amounts.items(),
+                         key=operator.itemgetter(1))[0]
+        if received_amounts[max_recipient] == 0:
+            break
+        if abs(received_amounts[max_debtor]) <= received_amounts[max_recipient]:
+            if max_debtor in debtor_dict:
+                debtor_dict[max_debtor][max_recipient] = abs(
+                    received_amounts[max_debtor])
+            else:
+                debtor_dict[max_debtor] = {
+                    max_recipient: abs(received_amounts[max_debtor])
+                }
+            received_amounts[max_recipient] += received_amounts[max_debtor]
+            received_amounts[max_debtor] = 0
+        else:
+            if max_debtor in debtor_dict:
+                debtor_dict[max_debtor][max_recipient] = received_amounts[max_recipient]
+            else:
+                debtor_dict[max_debtor] = {
+                    max_recipient: received_amounts[max_recipient]
+                }
+            received_amounts[max_debtor] += received_amounts[max_recipient]
+            received_amounts[max_recipient] = 0
+
+    return debtor_dict
+
+
 def validate_payload(payload):
     '''
     Validates the request payload to ensure values are correct.
@@ -379,7 +435,7 @@ def validate_payload(payload):
     sum = 0
     for participant in payload['participants']:
         amount = participant['amount']
-        sum += amount if amount is not None else 0
+        sum += amount if amount != None else 0
     if round(sum, 2) > payload['subtotal']:
         raise Exception(
             "Participant amounts add up to more than the subtotal.")
