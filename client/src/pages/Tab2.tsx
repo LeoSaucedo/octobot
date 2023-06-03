@@ -30,6 +30,7 @@ const Tab2: React.FC = () => {
   const [showHideTransactions, setShowHideTransactions] = useState(false);
 
   const [groupName, setGroupName] = useState("");
+  const [simplify, setSimplify] = useState(false);
 
   const [report, setReport] = useState(new Report());
 
@@ -48,6 +49,7 @@ const Tab2: React.FC = () => {
   let initialValues = {
     group: "",
     reset: false,
+    simplify: false,
   };
 
   async function isAuthenticated() {
@@ -60,8 +62,12 @@ const Tab2: React.FC = () => {
     return value !== null;
   }
 
-  async function fetchReport(groupName: string, reset: boolean) {
-    await getReport(groupName.toLowerCase().trim(), reset)
+  async function fetchReport(
+    groupName: string,
+    reset: boolean,
+    simplify: boolean
+  ) {
+    await getReport(groupName.toLowerCase().trim(), reset, simplify)
       .then((response) => {
         handleShowReport();
         setReport(response);
@@ -83,7 +89,7 @@ const Tab2: React.FC = () => {
   const onSubmit = async (data: any) => {
     setShowHideTransactions(false);
     if (await isAuthenticated()) {
-      await fetchReport(data.group, data.reset);
+      await fetchReport(data.group, data.reset, data.simplify);
       reset(initialValues);
     } else {
       if (data.reset) {
@@ -93,10 +99,11 @@ const Tab2: React.FC = () => {
           buttons: ["OK"],
         });
       } else {
-        await fetchReport(data.group, false);
+        await fetchReport(data.group, false, data.simplify);
       }
     }
     setGroupName(data.group);
+    setSimplify(data.simplify);
   };
   return (
     <IonPage>
@@ -130,6 +137,20 @@ const Tab2: React.FC = () => {
             <Controller
               control={control}
               name="reset"
+              render={({ field: { value, onChange } }) => (
+                <IonCheckbox
+                  slot="start"
+                  checked={value}
+                  onIonChange={({ detail: { checked } }) => onChange(checked)}
+                />
+              )}
+            />
+          </IonItem>
+          <IonItem lines="none">
+            <IonLabel>Simplify Debts</IonLabel>
+            <Controller
+              control={control}
+              name="simplify"
               render={({ field: { value, onChange } }) => (
                 <IonCheckbox
                   slot="start"
@@ -214,7 +235,11 @@ const Tab2: React.FC = () => {
                                   await transactionApi
                                     .deleteTransaction(transaction.id)
                                     .then(async () => {
-                                      await fetchReport(groupName, false);
+                                      await fetchReport(
+                                        groupName,
+                                        false,
+                                        simplify
+                                      );
                                     });
                                 },
                               },

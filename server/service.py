@@ -228,13 +228,14 @@ def get_db_rows(transaction_id):
     return rows
 
 
-def generate_report(group_name, reset_tab):
+def generate_report(group_name, reset_tab, simplify=False):
     '''
     Generates a report for the given group name.
 
 
     :param group_name: Name of the group to generate a report for
     :param reset_tab: Boolean indicating whether or not to reset the tab
+    :param simplify: Boolean indicating whether or not to simplify the debts
     :return: List of strings in the format of "x owes y $amount"
     '''
 
@@ -351,8 +352,9 @@ def generate_report(group_name, reset_tab):
             else:
                 debtor_dict[debtor][recipient] += amount
 
-    # Use our simplification algorithm to reduce the number of overall transactions.
-    debtor_dict = simplify_debts(debtor_dict)
+    if (simplify):
+        # Use our simplification algorithm to reduce the number of overall transactions.
+        debtor_dict = simplify_debts(debtor_dict)
 
     # Set up an array of strings to store the output.
     output = []
@@ -396,12 +398,12 @@ def simplify_debts(debtor_dict):
     debtor_dict.clear()
     max_recipient = None
     while (True):
-        output = []
+        print(received_amounts)
         max_recipient = max(received_amounts.items(),
                             key=operator.itemgetter(1))[0]
         max_debtor = min(received_amounts.items(),
                          key=operator.itemgetter(1))[0]
-        if received_amounts[max_recipient] == 0:
+        if round(received_amounts[max_recipient], 2) == 0.00:
             break
         if abs(received_amounts[max_debtor]) <= received_amounts[max_recipient]:
             if max_debtor in debtor_dict:

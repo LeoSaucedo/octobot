@@ -25,14 +25,18 @@ def report(group_name):
     This endpoint is used to get the report for a group.
     :param group_name: A url parameter representing the name of the group to get the report for
     :query reset: If true, the report will be reset after it is returned
+    :query simplify: If true, the report will be simplified
     :return: The report for the group
     '''
     reset = request.args.get('reset', 'false')
+    simplify = request.args.get('simplify', 'false')
     print("Incoming request for report for group: " +
-          str(group_name) + " with reset: " + str(reset))
+          str(group_name) + " with reset: " + str(reset)
+          + " and simplify: " + str(simplify))
     if reset not in ['true', 'false']:
         return 'Bad Request', 400
-    report = service.generate_report(group_name, reset == 'true')
+    report = service.generate_report(
+        group_name, reset == 'true', simplify == 'true')
     transactions = service.get_transactions(group_name)
     return {"report": report, "transactions": transactions}
 
