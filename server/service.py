@@ -396,9 +396,7 @@ def simplify_debts(debtor_dict):
                 received_amounts[debtor] -= debtor_dict[debtor][recipient]
                 received_amounts[recipient] += debtor_dict[debtor][recipient]
     debtor_dict.clear()
-    max_recipient = None
     while (True):
-        print(received_amounts)
         max_recipient = max(received_amounts.items(),
                             key=operator.itemgetter(1))[0]
         max_debtor = min(received_amounts.items(),

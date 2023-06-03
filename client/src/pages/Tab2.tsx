@@ -15,11 +15,15 @@ import {
   IonCheckbox,
   useIonAlert,
   IonCardSubtitle,
+  IonIcon,
+  IonModal,
+  IonButtons,
 } from "@ionic/react";
 import "./Tab2.css";
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Report, Transaction } from "../api/ReportApi";
+import { helpCircleOutline } from "ionicons/icons";
 import getReport from "../api/ReportApi";
 import transactionApi from "../api/TransactionApi";
 import { Preferences } from "@capacitor/preferences";
@@ -28,6 +32,7 @@ const Tab2: React.FC = () => {
   const [hasClicked, setHasClicked] = useState(false);
   const [showHideTotals, setShowHideTotals] = useState(false);
   const [showHideTransactions, setShowHideTransactions] = useState(false);
+  const [showHideSimplifyModal, setShowHideSimplifyModal] = useState(false);
 
   const [groupName, setGroupName] = useState("");
   const [simplify, setSimplify] = useState(false);
@@ -147,7 +152,7 @@ const Tab2: React.FC = () => {
             />
           </IonItem>
           <IonItem lines="none">
-            <IonLabel>Simplify Debts</IonLabel>
+            <IonLabel>Simplify Payments</IonLabel>
             <Controller
               control={control}
               name="simplify"
@@ -159,6 +164,47 @@ const Tab2: React.FC = () => {
                 />
               )}
             />
+            <IonButton
+              type="button"
+              fill="clear"
+              color="medium"
+              onClick={() => setShowHideSimplifyModal(true)}
+            >
+              <IonIcon slot="icon-only" icon={helpCircleOutline}></IonIcon>
+            </IonButton>
+            <IonModal isOpen={showHideSimplifyModal}>
+              <IonHeader>
+                <IonToolbar>
+                  <IonTitle>Payment Simplification</IonTitle>
+                  <IonButtons slot="end">
+                    <IonButton onClick={() => setShowHideSimplifyModal(false)}>
+                      Close
+                    </IonButton>
+                  </IonButtons>
+                </IonToolbar>
+              </IonHeader>
+              <IonContent className="ion-padding">
+                <p>
+                  <strong>Payment simplification</strong> (a.k.a. "
+                  <em>simplify payments</em>" or "<em>payment rearrangement</em>
+                  ") is a feature of <strong>Octobot</strong> that restructures
+                  payments within a group and among friends. It doesn't alter
+                  the overall amount owed by anyone, but it streamlines the
+                  process of reimbursing individuals by reducing the total
+                  number of payments.
+                </p>
+
+                <p>
+                  For instance, let's consider a scenario where{" "}
+                  <strong>Alex, Bryan, and Carlos</strong> share an apartment.
+                  Alex owes Bryan $20, and Bryan owes Carlos $20. Instead of
+                  initiating two separate payments, <strong>Octobot</strong>{" "}
+                  would advise Alex to directly pay $20 to Carlos, thus
+                  minimizing the total number of transactions. This ensures
+                  faster and more efficient repayment for everyone involved.
+                </p>
+              </IonContent>
+            </IonModal>
           </IonItem>
           <IonButton
             className="ion-margin-top"
