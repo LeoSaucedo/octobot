@@ -15,11 +15,15 @@ import {
   IonCheckbox,
   useIonAlert,
   IonCardSubtitle,
+  IonIcon,
+  IonModal,
+  IonButtons,
 } from "@ionic/react";
 import "./Tab2.css";
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Report, Transaction } from "../api/ReportApi";
+import { helpCircleOutline } from "ionicons/icons";
 import getReport from "../api/ReportApi";
 import transactionApi from "../api/TransactionApi";
 import { Preferences } from "@capacitor/preferences";
@@ -28,6 +32,7 @@ const Tab2: React.FC = () => {
   const [hasClicked, setHasClicked] = useState(false);
   const [showHideTotals, setShowHideTotals] = useState(false);
   const [showHideTransactions, setShowHideTransactions] = useState(false);
+  const [showHideSimplifyModal, setShowHideSimplifyModal] = useState(false);
 
   const [groupName, setGroupName] = useState("");
   const [simplify, setSimplify] = useState(false);
@@ -159,6 +164,56 @@ const Tab2: React.FC = () => {
                 />
               )}
             />
+            <IonButton
+              type="button"
+              fill="clear"
+              color="medium"
+              onClick={() => setShowHideSimplifyModal(true)}
+            >
+              <IonIcon slot="icon-only" icon={helpCircleOutline}></IonIcon>
+            </IonButton>
+            <IonModal isOpen={showHideSimplifyModal}>
+              <IonHeader>
+                <IonToolbar>
+                  <IonTitle>Simplifying Debts</IonTitle>
+                  <IonButtons slot="end">
+                    <IonButton onClick={() => setShowHideSimplifyModal(false)}>
+                      Close
+                    </IonButton>
+                  </IonButtons>
+                </IonToolbar>
+              </IonHeader>
+              <IonContent className="ion-padding">
+                <p>
+                  Octobot offers a helpful feature called "
+                  <strong>debt simplification</strong>" that makes sharing
+                  expenses with friends easier. Imagine you and your pals,{" "}
+                  <em>Alex</em>, <em>Blake</em>, and <em>Charlie</em>, splitting
+                  costs for something like a group outing. Sometimes, you might
+                  owe money to one friend while another friend owes you.
+                  Octobot's "<strong>debt simplification</strong>" comes to the
+                  rescue! Instead of everyone making separate payments, Octobot
+                  figures out a smarter way to settle things.
+                </p>
+
+                <p>
+                  For example, let's say you owe <strong>$20</strong> to{" "}
+                  <em>Alex</em>, and <em>Blake</em> owes <strong>$20</strong> to{" "}
+                  <em>Charlie</em>. Octobot suggests you give your{" "}
+                  <strong>$20</strong> directly to <em>Charlie</em>, and{" "}
+                  <em>Blake</em> gives their <strong>$20</strong> to{" "}
+                  <em>Alex</em>. That means only one payment per person instead
+                  of two, making it faster to get your money back.
+                </p>
+
+                <p>
+                  With Octobot's "<strong>debt simplification</strong>", sharing
+                  expenses and getting paid back is a breeze. It removes the
+                  confusion, making things fair and simple among friends like
+                  you, <em>Alex</em>, <em>Blake</em>, and <em>Charlie</em>.
+                </p>
+              </IonContent>
+            </IonModal>
           </IonItem>
           <IonButton
             className="ion-margin-top"
