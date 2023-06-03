@@ -152,7 +152,7 @@ const Tab2: React.FC = () => {
             />
           </IonItem>
           <IonItem lines="none">
-            <IonLabel>Simplify Debts</IonLabel>
+            <IonLabel>Simplify Payments</IonLabel>
             <Controller
               control={control}
               name="simplify"
@@ -175,7 +175,7 @@ const Tab2: React.FC = () => {
             <IonModal isOpen={showHideSimplifyModal}>
               <IonHeader>
                 <IonToolbar>
-                  <IonTitle>Simplifying Debts</IonTitle>
+                  <IonTitle>Payment Simplification</IonTitle>
                   <IonButtons slot="end">
                     <IonButton onClick={() => setShowHideSimplifyModal(false)}>
                       Close
@@ -185,32 +185,23 @@ const Tab2: React.FC = () => {
               </IonHeader>
               <IonContent className="ion-padding">
                 <p>
-                  Octobot offers a helpful feature called "
-                  <strong>debt simplification</strong>" that makes sharing
-                  expenses with friends easier. Imagine you and your pals,{" "}
-                  <em>Alex</em>, <em>Blake</em>, and <em>Charlie</em>, splitting
-                  costs for something like a group outing. Sometimes, you might
-                  owe money to one friend while another friend owes you.
-                  Octobot's "<strong>debt simplification</strong>" comes to the
-                  rescue! Instead of everyone making separate payments, Octobot
-                  figures out a smarter way to settle things.
+                  <strong>Payment simplification</strong> (a.k.a. "
+                  <em>simplify payments</em>" or "<em>payment rearrangement</em>
+                  ") is a feature of <strong>Octobot</strong> that restructures
+                  payments within a group and among friends. It doesn't alter
+                  the overall amount owed by anyone, but it streamlines the
+                  process of reimbursing individuals by reducing the total
+                  number of payments.
                 </p>
 
                 <p>
-                  For example, let's say you owe <strong>$20</strong> to{" "}
-                  <em>Alex</em>, and <em>Blake</em> owes <strong>$20</strong> to{" "}
-                  <em>Charlie</em>. Octobot suggests you give your{" "}
-                  <strong>$20</strong> directly to <em>Charlie</em>, and{" "}
-                  <em>Blake</em> gives their <strong>$20</strong> to{" "}
-                  <em>Alex</em>. That means only one payment per person instead
-                  of two, making it faster to get your money back.
-                </p>
-
-                <p>
-                  With Octobot's "<strong>debt simplification</strong>", sharing
-                  expenses and getting paid back is a breeze. It removes the
-                  confusion, making things fair and simple among friends like
-                  you, <em>Alex</em>, <em>Blake</em>, and <em>Charlie</em>.
+                  For instance, let's consider a scenario where{" "}
+                  <strong>Alex, Bryan, and Carlos</strong> share an apartment.
+                  Alex owes Bryan $20, and Bryan owes Carlos $20. Instead of
+                  initiating two separate payments, <strong>Octobot</strong>{" "}
+                  would advise Alex to directly pay $20 to Carlos, thus
+                  minimizing the total number of transactions. This ensures
+                  faster and more efficient repayment for everyone involved.
                 </p>
               </IonContent>
             </IonModal>
